@@ -68,11 +68,9 @@ SQL;
      */
     public function postgresqlUp(Schema $schema)
     {
-        $this->addSql("CREATE SEQUENCE {$this->prefix}lead_donotcontact_id_seq INCREMENT BY 1 MINVALUE 1 START 1");
-
         $sql = <<<SQL
 CREATE TABLE {$this->prefix}lead_donotcontact (
-  id INT NOT NULL, 
+  id SERIAL NOT NULL, 
   lead_id INT DEFAULT NULL, 
   date_added TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, 
   reason INT NOT NULL, 
