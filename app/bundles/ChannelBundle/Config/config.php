@@ -55,6 +55,11 @@ return [
 
     'services' => [
         'events' => [
+            'mautic.channel.campaignbundle.subscriber' => [
+                'class'     => 'Mautic\ChannelBundle\EventListener\CampaignSubscriber',
+                'arguments' => [
+                ],
+            ],
 
         ],
         'forms' => [
@@ -66,6 +71,15 @@ return [
                 'arguments' => [
                     'mautic.channel.model.message',
                 ],
+            ],
+            'mautic.form.type.message_list' => [
+                'class' => 'Mautic\ChannelBundle\Form\Type\MessageListType',
+                'alias' => 'message_list',
+            ],
+            'mautic.form.type.message_send' => [
+                'class'     => 'Mautic\ChannelBundle\Form\Type\MessageSendType',
+                'arguments' => 'router',
+                'alias'     => 'message_send',
             ],
         ],
         'others' => [

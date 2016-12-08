@@ -610,7 +610,8 @@ Mautic.launchCampaignEditor = function() {
                     };
 
                     var campaignId = mQuery('#campaignId').val();
-                    var query = "action=campaign:updateCoordinates&campaignId=" + campaignId + "&droppedX=" + endingPosition.top + "&droppedY=" + endingPosition.left + "&eventId=" + mQuery(event.target).attr('id');
+                    var campaignType = mQuery('#campaignType').val();
+                    var query = "action=campaign:updateCoordinates&campaignId=" + campaignId + "&droppedX=" + endingPosition.top + "&droppedY=" + endingPosition.left + "&eventId=" + mQuery(event.target).attr('id') + "campaignType=" + campaignType;
                     mQuery.ajax({
                         url: mauticAjaxUrl,
                         type: "POST",
@@ -822,7 +823,8 @@ Mautic.closeCampaignBuilder = function() {
     var canvasSettings = {canvasSettings: chart};
 
     var campaignId     = mQuery('#campaignId').val();
-    var query          = "action=campaign:updateConnections&campaignId=" + campaignId;
+    var campaignType     = mQuery('#campaignType').val();
+    var query          = "action=campaign:updateConnections&campaignId=" + campaignId + "&campaignType=" + campaignType;
 
     mQuery('.btn-close-builder').prop('disabled', true);
     mQuery.ajax({

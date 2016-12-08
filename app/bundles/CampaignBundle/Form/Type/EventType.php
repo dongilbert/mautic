@@ -199,6 +199,14 @@ class EventType extends AbstractType
             ]
         );
 
+        $builder->add(
+            'campaignType',
+            'hidden',
+            [
+                'mapped' => false,
+            ]
+        );
+
         $builder->addEventSubscriber(new CleanFormSubscriber($masks));
 
         if (!empty($options['action'])) {

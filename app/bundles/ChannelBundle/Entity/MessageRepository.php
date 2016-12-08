@@ -22,4 +22,17 @@ class MessageRepository extends CommonRepository
     {
         return 'mc';
     }
+
+    public function getMessages()
+    {
+        $q = $this->createQueryBuilder('mc');
+
+        $q->where($q->expr()->eq('mq.isPublished', ':published'))
+            ->setParameter('published', true, 'boolean')
+            ->indexBy('mc', 'mc.id');
+
+        $results = $q->getQuery()->getResult();
+
+        return $results;
+    }
 }

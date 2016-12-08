@@ -60,4 +60,14 @@ final class ChannelEvents
      * @var string
      */
     const PROCESS_MESSAGE_QUEUE_BATCH = 'mautic.process_message_queue_batch';
+
+    /**
+     * The mautic.channel.on_campaign_trigger_action event is fired when the campaign action triggers.
+     *
+     * The event listener receives a
+     * Mautic\CampaignBundle\Event\CampaignExecutionEvent
+     *
+     * @var string
+     */
+    const ON_CAMPAIGN_TRIGGER_ACTION = 'mautic.channel.on_campaign_trigger_action';
 }

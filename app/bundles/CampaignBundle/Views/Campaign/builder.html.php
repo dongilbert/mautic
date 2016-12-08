@@ -173,6 +173,7 @@
 <input type="hidden" value="" id="droppedX"/>
 <input type="hidden" value="" id="droppedY"/>
 <input type="hidden" value="<?php echo $campaignId; ?>" id="campaignId"/>
+<input type="hidden" value="<?php echo $campaignType; ?>" id="campaignType"/>
 
 <?php echo $view->render(
     'MauticCoreBundle:Helper:modal.html.php',

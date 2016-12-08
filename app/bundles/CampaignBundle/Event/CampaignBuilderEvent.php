@@ -252,7 +252,7 @@ class CampaignBuilderEvent extends Event
      *
      * @return array
      */
-    public function getActions()
+    public function getActions($campaignType)
     {
         static $sorted = false;
 

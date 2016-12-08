@@ -21,6 +21,21 @@ use Symfony\Component\Form\Form;
 class MessageController extends AbstractStandardFormController
 {
     /**
+     * @param        $objectAction
+     * @param int    $objectId
+     * @param string $objectModel
+     *
+     * @return JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function executeAction($objectAction, $objectId = 0, $objectSubId = 0, $objectModel = '')
+    {
+        if (method_exists($this, "{$objectAction}Action")) {
+            return $this->{"{$objectAction}Action"}($objectId);
+        } else {
+            return $this->accessDenied();
+        }
+    }
+    /**
      * @param $args
      * @param $view
      *
@@ -96,7 +111,16 @@ class MessageController extends AbstractStandardFormController
     {
         return $this->newStandard();
     }
-
+    /**
+     * @param      $objectId
+     * @param bool $ignorePost
+     *
+     * @return \Mautic\CoreBundle\Controller\Response|\Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function viewAction($objectId)
+    {
+        return $this->viewStandard($objectId);
+    }
     /**
      * @param      $objectId
      * @param bool $ignorePost

@@ -56,6 +56,7 @@ $isExisting = $entity->getId();
 <?php echo $view['form']->end($form); ?>
 <?php echo $view->render('MauticCampaignBundle:Campaign:builder.html.php', [
     'campaignId'      => $form['sessionId']->vars['data'],
+    'campaignType'    => $form['campaignType']->vars['data'],
     'campaignEvents'  => $campaignEvents,
     'campaignSources' => $campaignSources,
     'eventSettings'   => $eventSettings,

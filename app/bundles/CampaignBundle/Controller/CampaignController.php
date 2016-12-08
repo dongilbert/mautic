@@ -362,7 +362,8 @@ class CampaignController extends FormController
         //set the page we came from
         $page = $this->get('session')->get('mautic.campaign.page', 1);
 
-        $sessionId = $this->request->request->get('campaign[sessionId]', 'mautic_'.sha1(uniqid(mt_rand(), true)), true);
+        $sessionId    = $this->request->request->get('campaign[sessionId]', 'mautic_'.sha1(uniqid(mt_rand(), true)), true);
+        $campaignType = isset($formData['campaignType']) ? $formData['campaignType'] : 'manual';
 
         //set added/updated events
         list($modifiedEvents, $deletedEvents, $campaignEvents) = $this->getSessionEvents($sessionId);
@@ -452,9 +453,10 @@ class CampaignController extends FormController
                         if (!empty($sources)) {
                             $sourceList             = $model->getSourceLists($type);
                             $campaignSources[$type] = [
-                                'sourceType' => $type,
-                                'campaignId' => $sessionId,
-                                'names'      => implode(', ', array_intersect_key($sourceList, array_flip($sources))),
+                                'sourceType'   => $type,
+                                'campaignId'   => $sessionId,
+                                'campaignType' => $campaignType,
+                                'names'        => implode(', ', array_intersect_key($sourceList, array_flip($sources))),
                             ];
                         }
                     }
@@ -530,11 +532,12 @@ class CampaignController extends FormController
     public function editAction($objectId, $ignorePost = false, Campaign $clonedEntity = null, array $currentSources = null)
     {
         /** @var \Mautic\CampaignBundle\Model\CampaignModel $model */
-        $model     = $this->getModel('campaign');
-        $formData  = $this->request->request->get('campaign');
-        $sessionId = isset($formData['sessionId']) ? $formData['sessionId'] : null;
-        $session   = $this->get('session');
-        $isClone   = false;
+        $model        = $this->getModel('campaign');
+        $formData     = $this->request->request->get('campaign');
+        $sessionId    = isset($formData['sessionId']) ? $formData['sessionId'] : null;
+        $campaignType = isset($formData['campaignType']) ? $formData['campaignType'] : 'manual';
+        $session      = $this->get('session');
+        $isClone      = false;
         if ($clonedEntity instanceof Campaign) {
             $entity  = $clonedEntity;
             $isClone = true;
@@ -767,9 +770,10 @@ class CampaignController extends FormController
                 if (!empty($sources)) {
                     $sourceList             = $model->getSourceLists($type);
                     $campaignSources[$type] = [
-                        'sourceType' => $type,
-                        'campaignId' => $objectId,
-                        'names'      => implode(', ', array_intersect_key($sourceList, $sources)),
+                        'sourceType'   => $type,
+                        'campaignId'   => $objectId,
+                        'campaignType' => $campaignType,
+                        'names'        => implode(', ', array_intersect_key($sourceList, $sources)),
                     ];
                 }
             }

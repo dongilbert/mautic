@@ -38,14 +38,16 @@ class EventController extends CommonFormController
             $anchorName           = $event['anchor'];
             $event['triggerDate'] = (!empty($event['triggerDate'])) ? $this->factory->getDate($event['triggerDate'])->getDateTime() : null;
         } else {
-            $type       = $this->request->query->get('type');
-            $eventType  = $this->request->query->get('eventType');
-            $campaignId = $this->request->query->get('campaignId');
-            $anchorName = $this->request->query->get('anchor', '');
-            $event      = [
+            $type         = $this->request->query->get('type');
+            $eventType    = $this->request->query->get('eventType');
+            $campaignId   = $this->request->query->get('campaignId');
+            $campaignType = $this->request->query->get('campaignType');
+            $anchorName   = $this->request->query->get('anchor', '');
+            $event        = [
                 'type'            => $type,
                 'eventType'       => $eventType,
                 'campaignId'      => $campaignId,
+                'campaignType'    => $campaignType,
                 'anchor'          => $anchorName,
                 'anchorEventType' => $this->request->query->get('anchorEventType', ''),
             ];
@@ -71,7 +73,7 @@ class EventController extends CommonFormController
         }
 
         //fire the builder event
-        $events = $this->getModel('campaign')->getEvents();
+        $events = $this->getModel('campaign')->getEvents(null, $campaignType);
         $form   = $this->get('form.factory')->create(
             'campaignevent',
             $event,
@@ -148,9 +150,10 @@ class EventController extends CommonFormController
             $passthroughVars['eventHtml'] = $this->renderView(
                 $template,
                 [
-                    'event'      => $event,
-                    'id'         => $keyId,
-                    'campaignId' => $campaignId,
+                    'event'        => $event,
+                    'id'           => $keyId,
+                    'campaignId'   => $campaignId,
+                    'campaignType' => $campaignType,
                 ]
             );
             $passthroughVars['eventType'] = $eventType;
@@ -220,6 +223,11 @@ class EventController extends CommonFormController
             : $this->request->query->get(
                 'campaignId'
             );
+        $campaignType = ($method == 'POST')
+            ? $this->request->request->get('campaignevent[campaignType]', '', true)
+            : $this->request->query->get(
+                'campaignType'
+            );
         $modifiedEvents = $session->get('mautic.campaign.'.$campaignId.'.events.modified', []);
         $success        = 0;
         $valid          = $cancelled          = false;
@@ -266,7 +274,7 @@ class EventController extends CommonFormController
             }
 
             //fire the builder event
-            $events = $this->getModel('campaign')->getEvents();
+            $events = $this->getModel('campaign')->getEvents(null, $campaignType);
             $form   = $this->get('form.factory')->create(
                 'campaignevent',
                 $event,
