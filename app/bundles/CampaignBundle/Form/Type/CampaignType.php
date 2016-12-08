@@ -125,7 +125,7 @@ class CampaignType extends AbstractType
             ],
         ]);
 
-        $builder->add('campaignType', 'hidden', ['empty_data' => 'manual']);
+        $builder->add('campaignType', 'hidden');
     }
 
     /**

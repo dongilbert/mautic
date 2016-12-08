@@ -362,8 +362,7 @@ class CampaignController extends FormController
         //set the page we came from
         $page = $this->get('session')->get('mautic.campaign.page', 1);
 
-        $sessionId    = $this->request->request->get('campaign[sessionId]', 'mautic_'.sha1(uniqid(mt_rand(), true)), true);
-        $campaignType = isset($formData['campaignType']) ? $formData['campaignType'] : 'manual';
+        $sessionId = $this->request->request->get('campaign[sessionId]', 'mautic_'.sha1(uniqid(mt_rand(), true)), true);
 
         //set added/updated events
         list($modifiedEvents, $deletedEvents, $campaignEvents) = $this->getSessionEvents($sessionId);
@@ -453,10 +452,10 @@ class CampaignController extends FormController
                         if (!empty($sources)) {
                             $sourceList             = $model->getSourceLists($type);
                             $campaignSources[$type] = [
-                                'sourceType'   => $type,
-                                'campaignId'   => $sessionId,
-                                'campaignType' => $campaignType,
-                                'names'        => implode(', ', array_intersect_key($sourceList, array_flip($sources))),
+                                'sourceType' => $type,
+                                'campaignId' => $sessionId,
+                                //'campaignType' => $campaignType,
+                                'names' => implode(', ', array_intersect_key($sourceList, array_flip($sources))),
                             ];
                         }
                     }

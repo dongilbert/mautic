@@ -34,7 +34,7 @@
             endforeach;
 
             foreach ($campaignEvents as $event):
-                echo $view->render('MauticCampaignBundle:Event:generic.html.php', ['event' => $event, 'campaignId' => $campaignId]);
+                echo $view->render('MauticCampaignBundle:Event:generic.html.php', ['event' => $event, 'campaignId' => $campaignId, 'campaignType' => $campaignType]);
             endforeach;
             ?>
 
@@ -123,7 +123,7 @@
                                     class="option_campaignLeadSource_<?php echo $option; ?>"
                                     data-href="<?php echo $view['router']->path(
                                         'mautic_campaignsource_action',
-                                        ['objectAction' => 'new', 'objectId' => $campaignId, 'sourceType' => $option]
+                                        ['objectAction' => 'new', 'objectId' => $campaignId, 'sourceType' => $option, 'campaignType' => $campaignType]
                                     ); ?>"
                                     data-target="#CampaignEventModal"
                                     title="<?php echo $view->escape($view['translator']->trans('mautic.campaign.leadsource.'.$option.'.tooltip')); ?>"
@@ -136,7 +136,7 @@
                         <?php endforeach; ?>
                         </select>
                     </div>
-                    <?php foreach (['action' => 'primary', 'decision' => 'success', 'condition' => 'danger'] as $eventGroup => $color): ?>
+                    <?php foreach (['action' => 'primary', 'decision' => 'success', 'condition' => 'danger', 'message' => 'warning'] as $eventGroup => $color): ?>
                     <div id="<?php echo ucfirst($eventGroup); ?>GroupList" class="hide">
                         <h4 class="mb-xs">
                             <span><?php echo $view['translator']->trans('mautic.campaign.event.'.$eventGroup.'s.header'); ?></span>
@@ -152,7 +152,7 @@
                                     class="option_campaignEvent_<?php echo str_replace('.', '', $k); ?>"
                                     data-href="<?php echo $view['router']->path(
                                         'mautic_campaignevent_action',
-                                        ['objectAction' => 'new', 'type' => $k, 'eventType' => $eventGroup, 'campaignId' => $campaignId, 'anchor' => '']
+                                        ['objectAction' => 'new', 'type' => $k, 'eventType' => $eventGroup, 'campaignId' => $campaignId, 'anchor' => '', 'campaignType' => $campaignType]
                                     ); ?>"
                                     data-target="#CampaignEventModal"
                                     title="<?php echo $view->escape($e['description']); ?>"
