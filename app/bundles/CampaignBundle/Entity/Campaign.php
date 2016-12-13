@@ -158,8 +158,9 @@ class Campaign extends FormEntity
             ->nullable()
             ->build();
 
-        $builder->createField('campaignType', 'text')
+        $builder->createField('campaignType', 'string')
             ->columnName('campaign_type')
+            ->length(60)
             ->nullable()
             ->build();
     }
