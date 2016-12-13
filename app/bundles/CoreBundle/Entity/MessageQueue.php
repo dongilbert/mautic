@@ -18,6 +18,6 @@ namespace Mautic\CoreBundle\Entity;
  *
  * @deprecated 2.4 to be removed in 3.0; use \Mautic\ChannelBundle\Entity\MessageQueue instead
  */
-class MessageQueue extends \Mautic\ChannelBundle\Entity\MessageQueue
+class MessageQueue extends \Mautic\ChannelBundle\Entity\MessageQueue implements DeprecatedInterface
 {
 }
