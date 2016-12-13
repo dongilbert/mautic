@@ -15,13 +15,14 @@ use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\ChannelBundle\Entity\Message;
 use Mautic\ChannelBundle\Form\Type\MessageType;
 use Mautic\ChannelBundle\Helper\ChannelListHelper;
+use Mautic\CoreBundle\Model\AjaxLookupModelInterface;
 use Mautic\CoreBundle\Model\FormModel;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class MessageModel.
  */
-class MessageModel extends FormModel
+class MessageModel extends FormModel implements AjaxLookupModelInterface
 {
     const CHANNEL_FEATURE = 'marketing_messages';
 
@@ -166,22 +167,20 @@ class MessageModel extends FormModel
     {
         $results = [];
         switch ($type) {
-            case 'message':
-                $entities = $this->getRepository()->getMessages(
+            case 'channel.message':
+                $entities = $this->getRepository()->getMessageList(
                     $filter,
                     $limit,
                     $start,
-                    $this->security->isGranted($this->getPermissionBase().':viewother'),
-                    isset($options['top_level']) ? $options['top_level'] : false,
-                    isset($options['ignore_ids']) ? $options['ignore_ids'] : []
+                    $this->security->isGranted($this->getPermissionBase().':viewother')
                 );
 
                 foreach ($entities as $entity) {
-                    $results[$entity['language']][$entity['id']] = $entity['name'];
+                    $results[] = [
+                        'label' => $entity['name'],
+                        'value' => $entity['id'],
+                    ];
                 }
-
-                //sort by language
-                ksort($results);
 
                 break;
         }

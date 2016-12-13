@@ -20,26 +20,36 @@ class MessageRepository extends CommonRepository
      */
     public function getTableAlias()
     {
-        return 'mc';
+        return 'm';
     }
 
-    public function getMessages($search = '', $limit = 10, $start = 0, $viewOther = false)
+    /**
+     * @param string $search
+     * @param int    $limit
+     * @param int    $start
+     * @param bool   $viewOther
+     *
+     * @return array
+     */
+    public function getMessageList($search = '', $limit = 10, $start = 0, $viewOther = false)
     {
-        $q = $this->createQueryBuilder('mc');
+        $alias = $this->getTableAlias();
+        $q     = $this->createQueryBuilder($this->getTableAlias());
+        $q->select('partial '.$alias.'.{id, name}');
 
         if (!empty($search)) {
             if (is_array($search)) {
                 $search = array_map('intval', $search);
-                $q->andWhere($q->expr()->in('mq.id', ':search'))
+                $q->andWhere($q->expr()->in($alias.'.id', ':search'))
                     ->setParameter('search', $search);
             } else {
-                $q->andWhere($q->expr()->like('mq.name', ':search'))
+                $q->andWhere($q->expr()->like($alias.'.name', ':search'))
                     ->setParameter('search', "%{$search}%");
             }
         }
 
         if (!$viewOther) {
-            $q->andWhere($q->expr()->eq('mq.createdBy', ':id'))
+            $q->andWhere($q->expr()->eq($alias.'.createdBy', ':id'))
                 ->setParameter('id', $this->currentUser->getId());
         }
 
@@ -48,7 +58,7 @@ class MessageRepository extends CommonRepository
                 ->setMaxResults($limit);
         }
 
-        $results = $q->getQuery()->getResult();
+        $results = $q->getQuery()->getArrayResult();
 
         return $results;
     }

@@ -28,19 +28,18 @@ class MessageListType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'multiple'    => true,
                 'required'    => false,
                 'modal_route' => 'mautic_message_action',
                 // Email form UI too complicated for a modal so force a popup
                 'force_popup'        => true,
-                'model'              => 'message',
+                'model'              => 'channel.message',
                 'multiple'           => true,
                 'ajax_lookup_action' => function (Options $options) {
                     $query = [
                         'is_published' => $options['is_published'],
                     ];
 
-                    return 'message:getLookupChoiceList&'.http_build_query($query);
+                    return 'channel:getLookupChoiceList&'.http_build_query($query);
                 },
                 'model_lookup_method' => 'getLookupResults',
                 'lookup_arguments'    => function (Options $options) {
