@@ -70,13 +70,13 @@ class MessageSendType extends AbstractType
             );
 
             $builder->add(
-                'newMessageButton',
+                'newMarketingMessageButton',
                 'button',
                 [
                     'attr' => [
                         'class'   => 'btn btn-primary btn-nospin',
                         'onclick' => 'Mautic.loadNewWindow({
-                        "windowUrl": "'.$windowUrl.'"
+                        "windowUrl": "'.$windowUrl.'", "windowName" : "newMessage"
                     })',
                         'icon' => 'fa fa-plus',
                     ],
@@ -86,10 +86,10 @@ class MessageSendType extends AbstractType
 
             // create button edit email
             $windowUrlEdit = $this->router->generate(
-                'mautic_email_action',
+                'mautic_message_action',
                 [
                     'objectAction' => 'edit',
-                    'objectId'     => 'emailId',
+                    'objectId'     => 'messageId',
                     'contentOnly'  => 1,
                     'updateSelect' => $options['update_select'],
                 ]
@@ -102,27 +102,10 @@ class MessageSendType extends AbstractType
                     'attr' => [
                         'class'    => 'btn btn-primary btn-nospin',
                         'onclick'  => 'Mautic.loadNewWindow(Mautic.standardEmailUrl({"windowUrl": "'.$windowUrlEdit.'"}))',
-                        'disabled' => !isset($options['data']['email']),
+                        'disabled' => !isset($options['data']['message']),
                         'icon'     => 'fa fa-edit',
                     ],
-                    'label' => 'mautic.email.send.edit.email',
-                ]
-            );
-
-            // create button preview email
-            $windowUrlPreview = $this->router->generate('mautic_email_preview', ['objectId' => 'emailId']);
-
-            $builder->add(
-                'previewMessageButton',
-                'button',
-                [
-                    'attr' => [
-                        'class'    => 'btn btn-primary btn-nospin',
-                        'onclick'  => 'Mautic.loadNewWindow(Mautic.standardEmailUrl({"windowUrl": "'.$windowUrlPreview.'"}))',
-                        'disabled' => !isset($options['data']['email']),
-                        'icon'     => 'fa fa-external-link',
-                    ],
-                    'label' => 'mautic.email.send.preview.email',
+                    'label' => 'mautic.channel.send.edit.message',
                 ]
             );
         }

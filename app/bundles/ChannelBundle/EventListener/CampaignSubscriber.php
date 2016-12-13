@@ -44,6 +44,6 @@ class CampaignSubscriber extends CommonSubscriber
             'formTypeOptions' => ['update_select' => 'campaignevent_properties_message'],
             'formTheme'       => 'MauticEmailBundle:FormTheme\MessageSend',
         ];
-        $event->addAction('message.send', $action);
+        $event->addMessage('message.send', $action);
     }
 }

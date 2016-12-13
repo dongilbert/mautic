@@ -23,13 +23,30 @@ class MessageRepository extends CommonRepository
         return 'mc';
     }
 
-    public function getMessages()
+    public function getMessages($search = '', $limit = 10, $start = 0, $viewOther = false)
     {
         $q = $this->createQueryBuilder('mc');
 
-        $q->where($q->expr()->eq('mq.isPublished', ':published'))
-            ->setParameter('published', true, 'boolean')
-            ->indexBy('mc', 'mc.id');
+        if (!empty($search)) {
+            if (is_array($search)) {
+                $search = array_map('intval', $search);
+                $q->andWhere($q->expr()->in('mq.id', ':search'))
+                    ->setParameter('search', $search);
+            } else {
+                $q->andWhere($q->expr()->like('mq.name', ':search'))
+                    ->setParameter('search', "%{$search}%");
+            }
+        }
+
+        if (!$viewOther) {
+            $q->andWhere($q->expr()->eq('mq.createdBy', ':id'))
+                ->setParameter('id', $this->currentUser->getId());
+        }
+
+        if (!empty($limit)) {
+            $q->setFirstResult($start)
+                ->setMaxResults($limit);
+        }
 
         $results = $q->getQuery()->getResult();
 

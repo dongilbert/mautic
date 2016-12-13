@@ -455,7 +455,7 @@ class CampaignModel extends CommonFormModel
      *
      * @return mixed
      */
-    public function getEvents($type = null, $campaignType = 'manual')
+    public function getEvents($type = null)
     {
         static $events;
 
@@ -464,10 +464,10 @@ class CampaignModel extends CommonFormModel
             $events = [];
             $event  = new Events\CampaignBuilderEvent($this->translator);
             $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_BUILD, $event);
-            $this->logger->error(print_r($campaignType, true));
-            $events['decision']  = ($campaignType == 'manual') ? $event->getDecisions() : [];
+            $events['decision']  = $event->getDecisions();
             $events['condition'] = $event->getConditions();
-            $events['action']    = $event->getActions($campaignType);
+            $events['action']    = $event->getActions();
+            $events['message']   = $event->getMessages();
 
             $associationRestrictions = ['action' => [], 'decision' => []];
             $anchorRestrictions      = [];

@@ -66,9 +66,7 @@ $isExisting = $entity->getId();
 
 
 <?php
-$type = $entity->getCampaignType();
-echo $isExisting;
-if (!$isExisting || empty($type) || !empty($forceTypeSelection)):
+if (!$isExisting):
     echo $view->render('MauticCoreBundle:Helper:form_selecttype.html.php',
         [
             'item'       => $entity,

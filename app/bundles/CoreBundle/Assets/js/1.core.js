@@ -290,9 +290,14 @@ var Mautic = {
     loadNewWindow: function (options) {
         if (options.windowUrl) {
             Mautic.startModalLoadingBar();
+            var windowName = 'mauticpopup';
+
+            if (option.windowName) {
+                windowName = option.windowName;
+            }
 
             setTimeout(function () {
-                var opener = window.open(options.windowUrl, 'mauticpopup', 'height=600,width=1100');
+                var opener = window.open(options.windowUrl, windowName, 'height=600,width=1100');
 
                 if (!opener || opener.closed || typeof opener.closed == 'undefined') {
                     alert(mauticLang.popupBlockerMessage);
