@@ -43,12 +43,8 @@ class MessageSendType extends AbstractType
             'marketingMessage',
             'message_list',
             [
-                'label'      => 'mautic.channel.send.selectmessages',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'   => 'form-control',
-                    'tooltip' => 'mautic.channel.choose.messages_descr',
-                ],
+                'label'       => 'mautic.channel.send.selectmessages',
+                'label_attr'  => ['class' => 'control-label'],
                 'multiple'    => false,
                 'required'    => true,
                 'constraints' => [
@@ -75,10 +71,8 @@ class MessageSendType extends AbstractType
                 [
                     'attr' => [
                         'class'   => 'btn btn-primary btn-nospin',
-                        'onclick' => 'Mautic.loadNewWindow({
-                        "windowUrl": "'.$windowUrl.'", "windowName" : "newMessage"
-                    })',
-                        'icon' => 'fa fa-plus',
+                        'onclick' => 'Mautic.loadNewWindow({windowUrl: \''.$windowUrl.'\'})',
+                        'icon'    => 'fa fa-plus',
                     ],
                     'label' => 'mautic.channel.create.new.message',
                 ]
@@ -101,7 +95,7 @@ class MessageSendType extends AbstractType
                 [
                     'attr' => [
                         'class'    => 'btn btn-primary btn-nospin',
-                        'onclick'  => 'Mautic.loadNewWindow(Mautic.standardEmailUrl({"windowUrl": "'.$windowUrlEdit.'"}))',
+                        'onclick'  => 'Mautic.loadNewWindow({windowUrl: \''.$windowUrlEdit.'\'})',
                         'disabled' => !isset($options['data']['message']),
                         'icon'     => 'fa fa-edit',
                     ],
