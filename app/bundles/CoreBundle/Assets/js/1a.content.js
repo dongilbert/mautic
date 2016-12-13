@@ -824,7 +824,7 @@ Mautic.activateChosenSelect = function(el, ignoreGlobal) {
             mQuery(el).on('change', function () {
                 var url = mQuery(el).attr('data-new-route');
                 // If the element is already in a modal then use a popup
-                if (mQuery(el).val() == 'new' && mQuery(el).attr('data-popup') == "true" || mQuery(el).closest('.modal').length > 0) {
+                if (mQuery(el).val() == 'new' && (mQuery(el).attr('data-popup') == "true" || mQuery(el).closest('.modal').length > 0)) {
                     var queryGlue = url.indexOf('?') >= 0 ? '&' : '?';
                     Mautic.loadNewWindow({
                         "windowUrl": url + queryGlue + "contentOnly=1&updateSelect=" + mQuery(el).attr('id')
