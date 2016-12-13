@@ -292,8 +292,8 @@ var Mautic = {
             Mautic.startModalLoadingBar();
             var windowName = 'mauticpopup';
 
-            if (option.windowName) {
-                windowName = option.windowName;
+            if (options.windowName) {
+                windowName = options.windowName;
             }
 
             setTimeout(function () {
