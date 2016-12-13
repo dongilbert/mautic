@@ -59,8 +59,12 @@ trait AjaxLookupControllerTrait
                                         $option['items'][$value]['text'] = $label['label'];
                                     }
                                 }
-                            } elseif (isset($option['label'])) {
-                                $option['text'] = $option['label'];
+                            } else {
+                                if (isset($result['label'])) {
+                                    $option['text'] = $result['label'];
+                                }
+
+                                $option['value'] = $result['value'];
                             }
                         } else {
                             $option[$group] = $result;
