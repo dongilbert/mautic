@@ -133,7 +133,7 @@
 
 .list-campaign-leadsource {
     /*background-color: #ffffe6;*/
-    border: solid 1px #fdb933;
+    border: solid 1px #5156fd;
     /*color: #fff;*/
 }
 
@@ -186,4 +186,8 @@
 
 .stat-boxes .pie-legend li {
     display: inline;
+}
+
+.list-campaign-message {
+    border: solid 1px #fddf39;
 }

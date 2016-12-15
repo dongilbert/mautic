@@ -575,24 +575,22 @@ Mautic.launchCampaignEditor = function() {
             'message': {
                 'top': {
                     'source': ['leadsource'],
-                    'action': ['bottom'],
-                    'condition': ['yes', 'no']
+                    'action': ['bottom', 'yes', 'no'],
+                    'condition': ['bottom','yes', 'no'],
+                    'message' :['bottom','yes', 'no']
                 },
                 'yes': {
-                    'source': [],
                     'action': ['top'],
                     'condition': ['top'],
                     'message' : ['top']
                 },
                 'no': {
-                    'source': [],
                     'action': ['top'],
                     'condition': ['top'],
                     'message' : ['top']
                 },
                 'bottom': {
-                    'source': [],
-                    'action': [],
+                    'action': ['top'],
                     'condition': ['top'],
                     'message' : ['top']
                 }
@@ -680,7 +678,9 @@ Mautic.launchCampaignEditor = function() {
         mQuery("#CampaignCanvas div.list-campaign-decision, #CampaignCanvas div.list-campaign-condition").each(function () {
             Mautic.campaignBuilderRegisterAnchors(['yes', 'no'], this);
         });
-
+        mQuery("#CampaignCanvas div.list-campaign-message").each(function () {
+            Mautic.campaignBuilderRegisterAnchors(['yes', 'no', 'bottom'], this);
+        });
         mQuery("#CampaignCanvas div.list-campaign-leadsource").not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').each(function () {
             Mautic.campaignBuilderRegisterAnchors(['leadSource', 'leadSourceLeft', 'leadSourceRight'], this);
         });

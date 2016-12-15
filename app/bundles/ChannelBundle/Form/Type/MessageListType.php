@@ -28,10 +28,8 @@ class MessageListType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'required'    => false,
-                'modal_route' => 'mautic_message_action',
-                // Email form UI too complicated for a modal so force a popup
-                'force_popup'        => true,
+                'required'           => false,
+                'modal_route'        => 'mautic_message_action',
                 'model'              => 'channel.message',
                 'multiple'           => true,
                 'ajax_lookup_action' => function (Options $options) {

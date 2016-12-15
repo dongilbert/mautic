@@ -16,7 +16,6 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
  * Class MessageSendType.
@@ -39,67 +38,28 @@ class MessageSendType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add(
-            'marketingMessage',
-            'message_list',
-            [
-                'label'       => 'mautic.channel.send.selectmessages',
-                'label_attr'  => ['class' => 'control-label'],
-                'multiple'    => false,
-                'required'    => true,
-                'constraints' => [
-                    new NotBlank(
-                        ['message' => 'mautic.channel.choosemessage.notblank']
-                    ),
-                ],
-            ]
-        );
-
-        if (!empty($options['update_select'])) {
-            $windowUrl = $this->router->generate(
-                'mautic_message_action',
-                [
-                    'objectAction' => 'new',
-                    'contentOnly'  => 1,
-                    'updateSelect' => $options['update_select'],
-                ]
-            );
-
-            $builder->add(
-                'newMarketingMessageButton',
-                'button',
-                [
-                    'attr' => [
-                        'class'   => 'btn btn-primary btn-nospin',
-                        'onclick' => 'Mautic.loadNewWindow({windowUrl: \''.$windowUrl.'\'})',
-                        'icon'    => 'fa fa-plus',
-                    ],
-                    'label' => 'mautic.channel.create.new.message',
-                ]
-            );
-
+        if (!empty($options['message_id'])) {
             // create button edit email
             $windowUrlEdit = $this->router->generate(
                 'mautic_message_action',
                 [
                     'objectAction' => 'edit',
-                    'objectId'     => 'messageId',
+                    'objectId'     => $options['message_id'],
                     'contentOnly'  => 1,
-                    'updateSelect' => $options['update_select'],
+                    'updateSelect' => true,
                 ]
             );
 
             $builder->add(
-                'editMessageButton',
+                'editEmailButton',
                 'button',
                 [
                     'attr' => [
-                        'class'    => 'btn btn-primary btn-nospin',
-                        'onclick'  => 'Mautic.loadNewWindow({windowUrl: \''.$windowUrlEdit.'\'})',
-                        'disabled' => !isset($options['data']['message']),
-                        'icon'     => 'fa fa-edit',
+                        'class'   => 'btn btn-primary btn-nospin',
+                        'onclick' => 'Mautic.loadNewWindow(Mautic.standardEmailUrl({"windowUrl": "'.$windowUrlEdit.'"}))',
+                        'icon'    => 'fa fa-edit',
                     ],
-                    'label' => 'mautic.channel.send.edit.message',
+                    'label' => 'mautic.email.send.edit.message',
                 ]
             );
         }
@@ -110,7 +70,7 @@ class MessageSendType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefined(['update_select']);
+        $resolver->setDefined(['message_id']);
     }
 
     /**

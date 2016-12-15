@@ -31,11 +31,11 @@ class MessageRepository extends CommonRepository
      *
      * @return array
      */
-    public function getMessageList($search = '', $limit = 10, $start = 0, $viewOther = false)
+    public function getMessageList($search = '', $limit = 10, $start = 0)
     {
         $alias = $this->getTableAlias();
         $q     = $this->createQueryBuilder($this->getTableAlias());
-        $q->select('partial '.$alias.'.{id, name}');
+        $q->select('partial '.$alias.'.{id, name, description}');
 
         if (!empty($search)) {
             if (is_array($search)) {
@@ -47,11 +47,7 @@ class MessageRepository extends CommonRepository
                     ->setParameter('search', "%{$search}%");
             }
         }
-
-        if (!$viewOther) {
-            $q->andWhere($q->expr()->eq($alias.'.createdBy', ':id'))
-                ->setParameter('id', $this->currentUser->getId());
-        }
+        $q->andWhere($q->expr()->eq($alias.'.isPublished', true));
 
         if (!empty($limit)) {
             $q->setFirstResult($start)

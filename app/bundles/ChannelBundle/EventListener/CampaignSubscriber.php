@@ -14,6 +14,7 @@ namespace Mautic\ChannelBundle\EventListener;
 use Mautic\CampaignBundle\CampaignEvents;
 use Mautic\CampaignBundle\Event\CampaignBuilderEvent;
 use Mautic\ChannelBundle\ChannelEvents;
+use Mautic\ChannelBundle\Model\MessageModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
 
 /**
@@ -21,6 +22,17 @@ use Mautic\CoreBundle\EventListener\CommonSubscriber;
  */
 class CampaignSubscriber extends CommonSubscriber
 {
+    private $messageModel;
+
+    /**
+     * CampaignSubscriber constructor.
+     *
+     * @param MessageModel $messageModel
+     */
+    public function __construct(MessageModel $messageModel)
+    {
+        $this->messageModel = $messageModel;
+    }
     /**
      * {@inheritdoc}
      */
@@ -36,14 +48,17 @@ class CampaignSubscriber extends CommonSubscriber
      */
     public function onCampaignBuild(CampaignBuilderEvent $event)
     {
-        $action = [
-            'label'           => 'mautic.channel.campaign.event.send',
-            'description'     => 'mautic.channel.campaign.event.send_descr',
-            'eventName'       => ChannelEvents::ON_CAMPAIGN_TRIGGER_ACTION,
-            'formType'        => 'message_send',
-            'formTypeOptions' => ['update_select' => 'campaignevent_properties_message'],
-            'formTheme'       => 'MauticEmailBundle:FormTheme\MessageSend',
-        ];
-        $event->addMessage('message.send', $action);
+        $entities = $this->messageModel->getRepository()->getMessageList();
+
+        foreach ($entities as $entity) {
+            $action = [
+                'label'           => $entity['name'],
+                'description'     => $entity['description'],
+                'eventName'       => ChannelEvents::ON_CAMPAIGN_TRIGGER_ACTION,
+                'formType'        => 'message_send',
+                'formTypeOptions' => ['message_id' => $entity['id']],
+            ];
+            $event->addMessage('message.send_'.$entity['name'], $action);
+        }
     }
 }
