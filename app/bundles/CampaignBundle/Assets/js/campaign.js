@@ -1447,6 +1447,7 @@ Mautic.selectCampaignType = function(campaignType) {
         mQuery('.page-header h3').text(mauticLang.newManualCampaign);
     }
 
+    mQuery('#campaign_campaignType').val(campaignType);
     mQuery('#campaignType').val(campaignType);
 
     mQuery('body').removeClass('noscroll');

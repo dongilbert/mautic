@@ -454,8 +454,7 @@ class CampaignController extends FormController
                             $campaignSources[$type] = [
                                 'sourceType' => $type,
                                 'campaignId' => $sessionId,
-                                //'campaignType' => $campaignType,
-                                'names' => implode(', ', array_intersect_key($sourceList, array_flip($sources))),
+                                'names'      => implode(', ', array_intersect_key($sourceList, array_flip($sources))),
                             ];
                         }
                     }

@@ -84,7 +84,7 @@ class Campaign extends FormEntity
     /**
      * @var
      */
-    private $campaignType = 'manual';
+    private $campaignType;
 
     /**
      * Constructor.
