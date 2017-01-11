@@ -61,6 +61,7 @@ class MessageController extends AbstractStandardFormController
                 ];
 
                 break;
+            case 'view':
             case 'new':
             case 'edit':
                 $viewParameters = [
@@ -119,7 +120,7 @@ class MessageController extends AbstractStandardFormController
      */
     public function viewAction($objectId)
     {
-        return $this->viewStandard($objectId);
+        return $this->viewStandard($objectId, 'message', 'message');
     }
     /**
      * @param      $objectId

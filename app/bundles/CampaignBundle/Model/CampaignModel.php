@@ -233,11 +233,20 @@ class CampaignModel extends CommonFormModel
         $events         =
         $hierarchy      =
         $parentUpdated  = [];
-
         //set the events from session
+        $messageRelationship = [];
+
         foreach ($sessionEvents as $properties) {
             $isNew = (!empty($properties['id']) && isset($existingEvents[$properties['id']])) ? false : true;
             $event = !$isNew ? $existingEvents[$properties['id']] : new Event();
+
+            if ($properties['eventType'] == 'message_decision' and !in_array($properties['id'], $deletedEvents)) {
+                $messageRelationship[$properties['id']] = [
+                    'parent'   => $properties['messageParent'],
+                    'decision' => $properties['id'],
+                    'order'    => $properties['order'],
+                ];
+            }
 
             foreach ($properties as $f => $v) {
                 if ($f == 'id' && strpos($v, 'new') === 0) {
@@ -297,7 +306,6 @@ class CampaignModel extends CommonFormModel
                 ];
             }
         }
-
         // Assign parent/child relationships
         foreach ($events as $id => $e) {
             if (isset($relationships[$id])) {
@@ -328,6 +336,11 @@ class CampaignModel extends CommonFormModel
 
                 // Remove decision so that it doesn't affect execution
                 $events[$id]->setDecisionPath(null);
+            }
+
+            if (isset($messageRelationship[$id])) {
+                $events[$id]->setParent($events[$messageRelationship[$id]['parent']]);
+                $events[$id]->setOrder($messageRelationship[$id]['order']);
             }
         }
 
@@ -500,6 +513,9 @@ class CampaignModel extends CommonFormModel
                         }
                         $anchorRestrictions[$group][$key][] = $anchor;
                     }
+                }
+                if (isset($action['campaignTypeNotIncluded'])) {
+                    $associationRestrictions['messageActions'][$key] = $action['campaignTypeNotIncluded'];
                 }
             }
 
@@ -1206,5 +1222,11 @@ class CampaignModel extends CommonFormModel
         }
 
         return $chart->render();
+    }
+
+    public function setEventsCampaignType($campaignType)
+    {
+        $event = new Events\CampaignBuilderEvent($this->translator);
+        $event->setCampaignType($campaignType);
     }
 }

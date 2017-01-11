@@ -40,4 +40,22 @@ class AjaxController extends CommonAjaxController
 
         return $this->sendJsonResponse($dataArray);
     }
+
+    protected function setEventCampaignType()
+    {
+    }
+
+    protected function setBuilderEventCampaignTypeAction(Request $request)
+    {
+        $campaignType = InputHelper::clean($request->query->get('campaignType'));
+        $this->getModel('campaign')->setEventsCampaignType($campaignType);
+
+        if (empty($campaignType)) {
+            $dataArray = ['success' => 0];
+        } else {
+            $dataArray = ['success' => 1];
+        }
+
+        return $this->sendJsonResponse($dataArray);
+    }
 }

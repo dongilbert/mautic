@@ -174,9 +174,11 @@ Mautic.campaignEventOnLoad = function (container, response) {
 
         mQuery(eventId).css({'left': x + 'px', 'top': y + 'px'});
 
-        if (response.eventType == 'decision' || response.eventType == 'condition') {
+        if (response.eventType == 'decision' || response.eventType == 'condition' || response.eventType == 'message') {
             Mautic.campaignBuilderRegisterAnchors(['top', 'yes', 'no'], eventId);
-        } else {
+        }
+
+        if (response.eventType == 'action') {
             Mautic.campaignBuilderRegisterAnchors(['top', 'bottom'], eventId);
         }
 
@@ -575,30 +577,31 @@ Mautic.launchCampaignEditor = function() {
             'message': {
                 'top': {
                     'source': ['leadsource'],
-                    'action': ['bottom', 'yes', 'no'],
-                    'condition': ['bottom','yes', 'no'],
-                    'message' :['bottom','yes', 'no']
+                    'action': ['yes', 'no','bottom'],
+                    'condition': ['yes', 'no'],
+                    'message' :['yes', 'no'],
+                    'decision': []
                 },
                 'yes': {
+                    'source': [],
                     'action': ['top'],
                     'condition': ['top'],
-                    'message' : ['top']
+                    'message': ['top'],
+                    'decision': []
                 },
                 'no': {
+                    'source': [],
                     'action': ['top'],
                     'condition': ['top'],
-                    'message' : ['top']
-                },
-                'bottom': {
-                    'action': ['top'],
-                    'condition': ['top'],
-                    'message' : ['top']
+                    'message': ['top'],
+                    'decision': []
                 }
             }
         };
         Mautic.campaignBuilderConnectionsMap['source']['leadsource'][typeAnchor] = ['top'];
         Mautic.campaignBuilderConnectionsMap['source']['leadsourceleft'][typeAnchor] = [];
         Mautic.campaignBuilderConnectionsMap['source']['leadsourceright'][typeAnchor] = [];
+        Mautic.campaignBuilderConnectionsMap['action']['top'][typeAnchor] = ['yes', 'no'];
         Mautic.campaignBuilderConnectionsMap['action']['top'][typeAnchor] = ['yes', 'no'];
         Mautic.campaignBuilderConnectionsMap['action']['bottom'][typeAnchor] = ['top'];
         if (campaignMarketingType.val() == 'intelligent') {
@@ -672,14 +675,14 @@ Mautic.launchCampaignEditor = function() {
             Mautic.campaignBuilderRegisterAnchors(['top'], this);
         });
 
-        mQuery("#CampaignCanvas div.list-campaign-event").not('.list-campaign-decision').not('.list-campaign-condition').not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').each(function () {
+        mQuery("#CampaignCanvas div.list-campaign-event").not('.list-campaign-decision').not('.list-campaign-condition').not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').not('.list-campaign-message').each(function () {
             Mautic.campaignBuilderRegisterAnchors(['bottom'], this);
         });
-        mQuery("#CampaignCanvas div.list-campaign-decision, #CampaignCanvas div.list-campaign-condition").each(function () {
+        mQuery("#CampaignCanvas div.list-campaign-decision, #CampaignCanvas div.list-campaign-condition, #CampaignCanvas div.list-campaign-message").each(function () {
             Mautic.campaignBuilderRegisterAnchors(['yes', 'no'], this);
         });
         mQuery("#CampaignCanvas div.list-campaign-message").each(function () {
-            Mautic.campaignBuilderRegisterAnchors(['yes', 'no', 'bottom'], this);
+            Mautic.campaignBuilderRegisterAnchors(['yes', 'no'], this);
         });
         mQuery("#CampaignCanvas div.list-campaign-leadsource").not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').each(function () {
             Mautic.campaignBuilderRegisterAnchors(['leadSource', 'leadSourceLeft', 'leadSourceRight'], this);
@@ -1063,7 +1066,7 @@ Mautic.campaignBuilderRegisterAnchors = function(names, el) {
             Mautic.campaignBuilderAnchorEventTypeClicked = epDetails.eventType;
 
             // Get the position of the event
-            var elPos = Mautic.campaignBuilderGetEventPosition(endpoint.element)
+            var elPos = Mautic.campaignBuilderGetEventPosition(endpoint.element);
             var spotFound = false,
                 putLeft = elPos.left,
                 putTop = elPos.top,
@@ -1071,7 +1074,7 @@ Mautic.campaignBuilderRegisterAnchors = function(names, el) {
                 fullWidth = Mautic.campaignBuilderEventDimensions.width + Mautic.campaignBuilderEventDimensions.anchor,
                 wiggleWidth = fullWidth + Mautic.campaignBuilderEventDimensions.wiggleWidth,
                 fullHeight = Mautic.campaignBuilderEventDimensions.height + Mautic.campaignBuilderEventDimensions.anchor,
-                wiggleHeight = fullHeight + Mautic.campaignBuilderEventDimensions.wiggleHeight
+                wiggleHeight = fullHeight + Mautic.campaignBuilderEventDimensions.wiggleHeight,
                 debug = false;
 
             if (debug) {
@@ -1393,6 +1396,12 @@ Mautic.campaignBuilderPrepareNewSource = function () {
 Mautic.campaignBuilderValidateConnection = function (epDetails, checkEvent) {
     var valid = true;
 
+    var isIntelligent =  mQuery('#campaignType').val();
+
+    if (isIntelligent == 'intelligent' && typeof Mautic.campaignBuilderConnectionRestrictions['messageActions'][checkEvent] !== 'undefined') {
+        return false;
+    }
+
     if ('source' == epDetails.eventType) {
         // If this is a source, do not show action/decisions that have type restrictions
         if (typeof Mautic.campaignBuilderConnectionRestrictions['action'] !== 'undefined' && typeof Mautic.campaignBuilderConnectionRestrictions['action'][checkEvent] !== 'undefined') {
@@ -1438,7 +1447,7 @@ Mautic.campaignBuilderValidateConnection = function (epDetails, checkEvent) {
     }
 
     return valid;
-}
+};
 
 Mautic.selectCampaignType = function(campaignType) {
     if (campaignType == 'intelligent') {

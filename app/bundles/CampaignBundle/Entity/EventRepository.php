@@ -149,7 +149,7 @@ class EventRepository extends CommonRepository
      *
      * @return array
      */
-    public function getRootLevelEvents($id, $includeDecisions = false)
+    public function getRootLevelEvents($id, $includeDecisions = false, $includeMessageDecisions = false)
     {
         $q = $this->getEntityManager()->createQueryBuilder();
 
@@ -161,6 +161,12 @@ class EventRepository extends CommonRepository
                     $q->expr()->isNull('e.parent')
                 )
             );
+
+        if (!$includeMessageDecisions) {
+            $q->andWhere(
+                $q->expr()->neq('e.eventType', $q->expr()->literal('message_decision'))
+            );
+        }
 
         if (!$includeDecisions) {
             $q->andWhere(

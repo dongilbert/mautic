@@ -427,11 +427,14 @@ class EventModel extends CommonFormModel
 
         if ($this->dispatcher->hasListeners(CampaignEvents::ON_EVENT_DECISION_TRIGGER)) {
             // Include decisions if there are listeners
-            $events = $repo->getRootLevelEvents($campaignId, true);
+            $events = $repo->getRootLevelEvents($campaignId, true, true);
 
             // Filter out decisions
             $decisionChildren = [];
             foreach ($events as $event) {
+                if ($event['eventType'] == 'message_decision') {
+                    $event['eventType'] = 'decision';
+                }
                 if ($event['eventType'] == 'decision') {
                     $decisionChildren[$event['id']] = $repo->getEventsByParent($event['id']);
                 }
@@ -570,7 +573,9 @@ class EventModel extends CommonFormModel
                     } else {
                         ++$sleepBatchCount;
                     }
-
+                    if ($event['eventType'] == 'message_decision') {
+                        $event['eventType'] = 'decision';
+                    }
                     if ($event['eventType'] == 'decision') {
                         ++$evaluatedEventCount;
                         ++$totalEventCount;
@@ -866,7 +871,7 @@ class EventModel extends CommonFormModel
                 $this->logger->debug(
                     'CAMPAIGN: Listener handled event for '.ucfirst($event['eventType']).' ID# '.$event['id'].' for contact ID# '.$lead->getId()
                 );
-            } elseif ($response === false && $event['eventType'] == 'action') {
+            } elseif ($response === false && ($event['eventType'] == 'action' || $event['eventType'] == 'message')) {
                 $result = false;
                 $debug  = 'CAMPAIGN: '.ucfirst($event['eventType']).' ID# '.$event['id'].' for contact ID# '.$lead->getId().' failed with a response of '.var_export($response, true);
 

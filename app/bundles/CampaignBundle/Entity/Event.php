@@ -106,6 +106,10 @@ class Event
      */
     private $log;
 
+    private $channel;
+
+    private $channelId;
+
     /**
      * @var
      */
@@ -122,9 +126,11 @@ class Event
      */
     public function __clone()
     {
-        $this->id       = null;
-        $this->tempId   = null;
-        $this->campaign = null;
+        $this->id        = null;
+        $this->tempId    = null;
+        $this->campaign  = null;
+        $this->channel   = null;
+        $this->channelId = null;
     }
 
     /**
@@ -211,6 +217,15 @@ class Event
             ->cascadeRemove()
             ->fetchExtraLazy()
             ->build();
+
+        $builder->createField('channel', 'string')
+            ->nullable()
+            ->build();
+
+        $builder->createField('channelId', 'integer')
+            ->columnName('channel_id')
+            ->nullable()
+            ->build();
     }
 
     /**
@@ -237,6 +252,8 @@ class Event
                     'children',
                     'parent',
                     'decisionPath',
+                    'channel',
+                    'channelId',
                 ]
             )
             ->setMaxDepth(1, 'parent')
@@ -654,5 +671,37 @@ class Event
     public function setTempId($tempId)
     {
         $this->tempId = $tempId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getChannel()
+    {
+        return $this->channel;
+    }
+
+    /**
+     * @param mixed $channel
+     */
+    public function setChannel($channel)
+    {
+        $this->channel = $channel;
+    }
+
+    /**
+     * @return int
+     */
+    public function getChannelId()
+    {
+        return $this->channelId;
+    }
+
+    /**
+     * @param int $channelId
+     */
+    public function setChannelId($channelId)
+    {
+        $this->channelId = $channelId;
     }
 }

@@ -107,13 +107,14 @@ class CampaignSubscriber extends CommonSubscriber
             $event->addAction(
                 'sms.send_text_sms',
                 [
-                    'label'            => 'mautic.campaign.sms.send_text_sms',
-                    'description'      => 'mautic.campaign.sms.send_text_sms.tooltip',
-                    'eventName'        => SmsEvents::ON_CAMPAIGN_TRIGGER_ACTION,
-                    'formType'         => 'smssend_list',
-                    'formTypeOptions'  => ['update_select' => 'campaignevent_properties_sms'],
-                    'formTheme'        => 'MauticSmsBundle:FormTheme\SmsSendList',
-                    'timelineTemplate' => 'MauticSmsBundle:SubscribedEvents\Timeline:index.html.php',
+                    'label'                   => 'mautic.campaign.sms.send_text_sms',
+                    'description'             => 'mautic.campaign.sms.send_text_sms.tooltip',
+                    'eventName'               => SmsEvents::ON_CAMPAIGN_TRIGGER_ACTION,
+                    'formType'                => 'smssend_list',
+                    'formTypeOptions'         => ['update_select' => 'campaignevent_properties_sms'],
+                    'formTheme'               => 'MauticSmsBundle:FormTheme\SmsSendList',
+                    'timelineTemplate'        => 'MauticSmsBundle:SubscribedEvents\Timeline:index.html.php',
+                    'campaignTypeNotIncluded' => ['sms.send_text_sms'], //these actions are included in the marketing messages and should not be incluced in intelligent campaigns
                 ]
             );
         }

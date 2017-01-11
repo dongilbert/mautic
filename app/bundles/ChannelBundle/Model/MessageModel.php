@@ -187,4 +187,14 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
 
         return $results;
     }
+
+    public function getMessageGoals($messageId)
+    {
+        return $this->getRepository()->getMessageGoalsPerChannel($messageId);
+    }
+
+    public function getChannelMessages($messageId)
+    {
+        return $this->getRepository()->getChannelMessages($messageId);
+    }
 }

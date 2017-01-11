@@ -51,7 +51,7 @@ class EventType extends AbstractType
             ]
         );
 
-        if (in_array($options['data']['eventType'], ['action', 'condition'])) {
+        if (in_array($options['data']['eventType'], ['action', 'condition', 'message'])) {
             $label = 'mautic.campaign.form.type';
 
             $choices = [

@@ -270,6 +270,7 @@ class CampaignController extends FormController
             'decision'  => [],
             'action'    => [],
             'condition' => [],
+            'message'   => [],
         ];
         foreach ($events as $event) {
             $event['logCount']                   = (isset($campaignLogCounts[$event['id']])) ? (int) $campaignLogCounts[$event['id']] : 0;
@@ -737,6 +738,9 @@ class CampaignController extends FormController
             $existingEvents = $entity->getEvents()->toArray();
 
             foreach ($existingEvents as $e) {
+                if ($e->getEventType() == 'message_decision') {
+                    continue;
+                }
                 $event = $e->convertToArray();
 
                 if ($isClone) {

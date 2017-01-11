@@ -51,6 +51,15 @@ class MessageSendType extends AbstractType
             );
 
             $builder->add(
+                'messageId',
+                'hidden',
+                [
+                    'data' => $options['message_id'],
+                ]
+
+            );
+
+            $builder->add(
                 'editEmailButton',
                 'button',
                 [

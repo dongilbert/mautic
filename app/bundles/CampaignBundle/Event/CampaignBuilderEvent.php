@@ -46,6 +46,11 @@ class CampaignBuilderEvent extends Event
     private $translator;
 
     /**
+     * @var string
+     */
+    private $campaignType;
+
+    /**
      * @param \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator
      */
     public function __construct($translator)
@@ -318,5 +323,21 @@ class CampaignBuilderEvent extends Event
         $action['description'] = (isset($action['description'])) ? $this->translator->trans($action['description']) : '';
 
         $this->messages[$key] = $action;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCampaignType()
+    {
+        return $this->campaignType;
+    }
+
+    /**
+     * @param string $campaignType
+     */
+    public function setCampaignType($campaignType)
+    {
+        $this->campaignType = $campaignType;
     }
 }

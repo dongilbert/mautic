@@ -91,12 +91,13 @@ class CampaignSubscriber extends CommonSubscriber
         $event->addDecision('email.open', $trigger);
 
         $action = [
-            'label'           => 'mautic.email.campaign.event.send',
-            'description'     => 'mautic.email.campaign.event.send_descr',
-            'eventName'       => EmailEvents::ON_CAMPAIGN_TRIGGER_ACTION,
-            'formType'        => 'emailsend_list',
-            'formTypeOptions' => ['update_select' => 'campaignevent_properties_email', 'with_email_types' => true],
-            'formTheme'       => 'MauticEmailBundle:FormTheme\EmailSendList',
+            'label'                   => 'mautic.email.campaign.event.send',
+            'description'             => 'mautic.email.campaign.event.send_descr',
+            'eventName'               => EmailEvents::ON_CAMPAIGN_TRIGGER_ACTION,
+            'formType'                => 'emailsend_list',
+            'formTypeOptions'         => ['update_select' => 'campaignevent_properties_email', 'with_email_types' => true],
+            'formTheme'               => 'MauticEmailBundle:FormTheme\EmailSendList',
+            'campaignTypeNotIncluded' => ['email.send'], //these actions are included in the marketing messages and should not be incluced in intelligent campaigns
         ];
         $event->addAction('email.send', $action);
     }
