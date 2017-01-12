@@ -102,18 +102,21 @@ class EventController extends CommonFormController
                             foreach ($messageSubEvents as $messageSubEvent) {
                                 $subKeyId                  = 'new'.hash('sha1', uniqid(mt_rand()));
                                 $modifiedEvents[$subKeyId] = [
-                                    'name'          => $messageSubEvent['name'],
-                                    'type'          => $messageSubEvent['goal_type'],
-                                    'eventType'     => 'message_decision',
-                                    'campaignId'    => $campaignId,
-                                    'triggerDate'   => $event['triggerDate'],
-                                    'channel'       => $messageSubEvent['channel'],
-                                    'channelId'     => $messageSubEvent['channel_id'],
-                                    'properties'    => json_decode($messageSubEvent['properties'], true),
-                                    'order'         => $messageSubEvent['goal_order'],
-                                    'messageParent' => $keyId,
-                                    'tempId'        => $subKeyId,
-                                    'id'            => $subKeyId,
+                                    'name'                => $messageSubEvent['name'],
+                                    'type'                => $messageSubEvent['goal_type'],
+                                    'eventType'           => 'message_decision',
+                                    'campaignId'          => $campaignId,
+                                    'triggerDate'         => $event['triggerDate'],
+                                    'triggerInterval'     => $event['triggerInterval'],
+                                    'triggerIntervalUnit' => $event['triggerIntervalUnit'],
+                                    'triggerMode'         => $event['triggerMode'],
+                                    'channel'             => $messageSubEvent['channel'],
+                                    'channelId'           => $messageSubEvent['channel_id'],
+                                    'properties'          => json_decode($messageSubEvent['properties'], true),
+                                    'order'               => $messageSubEvent['goal_order'],
+                                    'messageParent'       => $keyId,
+                                    'tempId'              => $subKeyId,
+                                    'id'                  => $subKeyId,
                                 ];
                             }
                         }
@@ -245,7 +248,6 @@ class EventController extends CommonFormController
         $success        = 0;
         $valid          = $cancelled          = false;
         $event          = (array_key_exists($objectId, $modifiedEvents)) ? $modifiedEvents[$objectId] : null;
-
         if ($method == 'POST') {
             $event['anchor'] = $this->request->request->get('campaignevent[anchor]', '', true);
         } else {

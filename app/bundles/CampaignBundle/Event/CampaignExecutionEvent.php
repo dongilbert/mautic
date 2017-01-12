@@ -62,6 +62,10 @@ class CampaignExecutionEvent extends Event
      */
     protected $logUpdatedByListener = false;
 
+    protected $channel;
+
+    protected $channelId;
+
     /**
      * CampaignExecutionEvent constructor.
      *

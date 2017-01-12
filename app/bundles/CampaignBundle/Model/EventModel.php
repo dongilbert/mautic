@@ -205,11 +205,11 @@ class EventModel extends CommonFormModel
         }
 
         //only trigger events for anonymous users (to prevent populating full of user/company data)
-        if (!$systemTriggered && !$this->security->isAnonymous()) {
+        /*if (!$systemTriggered && !$this->security->isAnonymous()) {
             $this->logger->debug('CAMPAIGN: contact not anonymous; abort');
 
             return false;
-        }
+        }*/
 
         //get the current lead
         $lead   = $this->leadModel->getCurrentLead();
@@ -234,12 +234,10 @@ class EventModel extends CommonFormModel
             $eventList[$leadId][$type] = $eventRepo->getPublishedByType($type, $leadCampaigns[$leadId], $lead->getId());
         }
         $events = $eventList[$leadId][$type];
-
         //get event settings from the bundles
         if (empty($availableEventSettings)) {
             $availableEventSettings = $this->campaignModel->getEvents();
         }
-
         //make sure there are events before continuing
         if (!count($availableEventSettings) || empty($events)) {
             $this->logger->debug('CAMPAIGN: no events found so abort');
@@ -283,6 +281,9 @@ class EventModel extends CommonFormModel
             foreach ($campaignEvents as $k => $event) {
                 //has this event already been examined via a parent's children?
                 //all events of this triggering type has to be queried since this particular event could be anywhere in the dripflow
+                if ($event['eventType'] == 'message_decision') { //change message decision to be triggered as a decision
+                    $event['eventType'] = 'decision';
+                }
                 if (in_array($event['id'], $examinedEvents[$leadId])) {
                     $this->logger->debug('CAMPAIGN: '.ucfirst($event['eventType']).' ID# '.$event['id'].' already processed this round');
                     continue;

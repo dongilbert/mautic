@@ -121,15 +121,20 @@ class CampaignSubscriber extends CommonSubscriber
      */
     public function onCampaignTriggerDecision(CampaignExecutionEvent $event)
     {
-        $eventDetails = $event->getEventDetails();
-        $eventParent  = $event->getEvent()['parent'];
+        $eventDetails  = $event->getEventDetails();
+        $eventParent   = $event->getEvent()['parent'];
+        $campaignEvent = $event->getEvent();
 
         if ($eventDetails == null) {
             return $event->setResult(false);
         }
 
         //check to see if the parent event is a "send email" event and that it matches the current email opened
-        if (!empty($eventParent) && $eventParent['type'] === 'email.send') {
+        if (!empty($eventParent) && ($eventParent['type'] === 'email.send' || $eventParent['type'] === 'message.send')) {
+            if (isset($campaignEvent['channelId']) && $eventDetails->getId() === (int) $campaignEvent['channelId']) {
+                return $event->setResult($eventDetails->getId() === (int) $campaignEvent['channelId']);
+            }
+
             return $event->setResult($eventDetails->getId() === (int) $eventParent['properties']['email']);
         }
 

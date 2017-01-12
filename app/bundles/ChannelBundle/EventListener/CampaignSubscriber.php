@@ -83,9 +83,9 @@ class CampaignSubscriber extends CommonSubscriber
             'eventSettings'   => $event->getEventSettings(),
         ];
         $eventType = [
-            'campaign' => $messageEvent['campaign'],
-            'name'     => $messageEvent['name'],
-
+            'campaign'            => $messageEvent['campaign'],
+            'name'                => $messageEvent['name'],
+            'id'                  => $messageEvent['id'],
             'eventType'           => 'action',
             'triggerDate'         => $messageEvent['triggerDate'],
             'triggerInterval'     => $messageEvent['triggerInterval'],

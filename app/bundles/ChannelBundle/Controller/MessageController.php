@@ -64,6 +64,12 @@ class MessageController extends AbstractStandardFormController
             case 'view':
             case 'new':
             case 'edit':
+            // Check to see if this is a popup
+            if (isset($form['updateSelect'])) {
+                $this->template = false;
+            } else {
+                $this->template = true;
+            }
                 $viewParameters = [
                     'channels' => $model->getChannels(),
                 ];
@@ -112,16 +118,7 @@ class MessageController extends AbstractStandardFormController
     {
         return $this->newStandard();
     }
-    /**
-     * @param      $objectId
-     * @param bool $ignorePost
-     *
-     * @return \Mautic\CoreBundle\Controller\Response|\Symfony\Component\HttpFoundation\JsonResponse
-     */
-    public function viewAction($objectId)
-    {
-        return $this->viewStandard($objectId, 'message', 'message');
-    }
+
     /**
      * @param      $objectId
      * @param bool $ignorePost

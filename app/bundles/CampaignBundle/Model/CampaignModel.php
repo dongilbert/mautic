@@ -247,7 +247,6 @@ class CampaignModel extends CommonFormModel
                     'order'    => $properties['order'],
                 ];
             }
-
             foreach ($properties as $f => $v) {
                 if ($f == 'id' && strpos($v, 'new') === 0) {
                     //set the temp ID used to be able to match up connections
@@ -451,7 +450,9 @@ class CampaignModel extends CommonFormModel
 
         foreach ($hierarchy as $eventId => $parent) {
             if ($parent == $root || $count === 1) {
-                $events[$eventId]->setOrder($order);
+                if ($events[$eventId]->getEventType() != 'message_decision') {
+                    $events[$eventId]->setOrder($order);
+                }
                 $entity->addEvent($eventId, $events[$eventId]);
                 unset($hierarchy[$eventId]);
                 if (count($hierarchy)) {

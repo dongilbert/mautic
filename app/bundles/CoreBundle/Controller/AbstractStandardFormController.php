@@ -14,7 +14,7 @@ namespace Mautic\CoreBundle\Controller;
 use Mautic\CoreBundle\Model\FormModel;
 
 /**
- * abstract StandardFormControllerInterface
+ * abstract StandardFormControllerInterface.
  */
 abstract class AbstractStandardFormController extends AbstractFormController
 {
@@ -27,6 +27,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
     protected $mauticContent;
     protected $controllerBase;
     protected $templateBase = 'MauticCoreBundle:Standard';
+    protected $template;
 
     /**
      * AbstractStandardFormController constructor.
@@ -44,42 +45,40 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Set $this->modelName to this controller's model
+     * Set $this->modelName to this controller's model.
      */
     abstract protected function setStandardModelName();
 
     /**
      * Set $this->routeBase if it meets the $this->getIndexRoute() and $this->getActionRoute() standard
-     * Or set $this->actionRoute and/or $this->indexRoute if not standard
+     * Or set $this->actionRoute and/or $this->indexRoute if not standard.
      */
     abstract protected function setStandardRoutes();
 
     /**
-     * Set $this->sessionBase to be used in filters, pagination, etc
+     * Set $this->sessionBase to be used in filters, pagination, etc.
      */
     abstract protected function setStandardSessionBase();
 
     /**
-     * Set $this->translationBase to be used in views
+     * Set $this->translationBase to be used in views.
      */
     abstract protected function setStandardTranslationBase();
 
     /**
-     * Set $this->templateBase if different than MauticCoreBundle:Standard and/or set $this->controllerBase if using MauticCoreBundle:Standard views
+     * Set $this->templateBase if different than MauticCoreBundle:Standard and/or set $this->controllerBase if using MauticCoreBundle:Standard views.
      */
     abstract protected function setStandardTemplateBases();
 
     /**
-     * Set $this->mauticContent to be used in passthroughVars for ajax responses
+     * Set $this->mauticContent to be used in passthroughVars for ajax responses.
      */
     abstract protected function setStandardFrontendVariables();
 
     /**
      * @param int    $id
      * @param string $modelName
-     *
-    /**
-     * @param int $page
+     * @param int    $page
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
@@ -235,7 +234,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
                     'passthroughVars' => [
                         'mauticContent' => $this->mauticContent,
                     ],
-                    'flashes'         => [
+                    'flashes' => [
                         [
                             'type'    => 'error',
                             'msg'     => $this->getTranslatedString('error.notfound'),
@@ -272,7 +271,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
         $route = $this->generateUrl($this->getActionRoute(), $routeVars);
 
         $delegateArgs = [
-            'viewParameters'  => [
+            'viewParameters' => [
                 'item'        => $entity,
                 'logs'        => $logs,
                 'tmpl'        => $this->request->isXmlHttpRequest() ? $this->request->get('tmpl', 'index') : 'index',
@@ -389,7 +388,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
         }
 
         $delegateArgs = [
-            'viewParameters'  => [
+            'viewParameters' => [
                 'permissionBase'  => $this->getPermissionBase(),
                 'mauticContent'   => $this->mauticContent,
                 'actionRoute'     => $this->getActionRoute(),
@@ -401,7 +400,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
                 'entity'          => $entity,
                 'form'            => (method_exists($this, 'getStandardFormView')) ?
                     $this->getStandardFormView($form, 'new') :
-                    $form->createView()
+                    $form->createView(),
             ],
             'contentTemplate' => $this->getStandardTemplate('form.html.php'),
             'passthroughVars' => [
@@ -458,11 +457,14 @@ abstract class AbstractStandardFormController extends AbstractFormController
         $returnUrl = $this->generateUrl($this->getIndexRoute(), ['page' => $page]);
 
         $viewParameters = ['page' => $page];
-        $template       = $this->controllerBase.':index';
+        if ($this->template) {
+            $this->template = $this->controllerBase.':index';
+        }
+
         $postActionVars = [
             'returnUrl'       => $returnUrl,
             'viewParameters'  => $viewParameters,
-            'contentTemplate' => $template,
+            'contentTemplate' => $this->template,
             'passthroughVars' => [
                 'mauticContent' => $this->mauticContent,
             ],
@@ -557,7 +559,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
                         [
                             'returnUrl'       => $returnUrl,
                             'viewParameters'  => $viewParameters,
-                            'contentTemplate' => $template,
+                            'contentTemplate' => $this->template,
                         ]
                     )
                 );
@@ -571,7 +573,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
         }
 
         $delegateArgs = [
-            'viewParameters'  => [
+            'viewParameters' => [
                 'permissionBase'  => $this->getPermissionBase(),
                 'mauticContent'   => $this->mauticContent,
                 'actionRoute'     => $this->getActionRoute(),
@@ -583,7 +585,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
                 'entity'          => $entity,
                 'form'            => (method_exists($this, 'getStandardFormView')) ?
                     $this->getStandardFormView($form, 'edit') :
-                    $form->createView()
+                    $form->createView(),
             ],
             'contentTemplate' => $this->getStandardTemplate('form.html.php'),
             'passthroughVars' => [
@@ -785,7 +787,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Get the template file
+     * Get the template file.
      *
      * @param $file
      *
@@ -803,7 +805,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Get the permission base from the model
+     * Get the permission base from the model.
      *
      * @return string
      */
@@ -813,7 +815,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Get index route
+     * Get index route.
      *
      * @return string
      */
@@ -823,7 +825,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Get action route
+     * Get action route.
      *
      * @return string
      */
@@ -833,7 +835,7 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Get custom or core translation
+     * Get custom or core translation.
      *
      * @param $string
      *
