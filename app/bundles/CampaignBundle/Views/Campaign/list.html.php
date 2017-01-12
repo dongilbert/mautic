@@ -97,7 +97,7 @@ if ($tmpl == 'index') {
                                 'mautic_campaign_action',
                                 ['objectAction' => 'view', 'objectId' => $item->getId()]
                             ); ?>" data-toggle="ajax">
-                                <?php echo $item->getName(); echo $type; ?>
+                                <?php echo $item->getName(); ?>
 
                                 <?php if ($type == 'intelligent'): ?>
                                     <span data-toggle="tooltip" title="<?php echo $view['translator']->trans(
