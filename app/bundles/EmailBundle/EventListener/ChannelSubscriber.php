@@ -42,12 +42,7 @@ class ChannelSubscriber extends CommonSubscriber
             [
                 MessageModel::CHANNEL_FEATURE => [
                     'lookupFormType' => 'email_list',
-                    'goalsSupported' => [
-                        'email.open',
-                        'page.pagehit',
-                        'asset.download',
-                        'form.submitted',
-                    ],
+                    'detailView'     => 'MauticEmailBundle:Email:view',
                 ],
                 LeadModel::CHANNEL_FEATURE => [],
             ]

@@ -37,7 +37,7 @@ class ChannelEvent extends CommonEvent
      *                        MessageModel::CHANNEL_FEATURE => [
      *                        'lookupFormType'       => (optional) Form type class/alias for the channel lookup list,
      *                        'propertiesFormType'   => (optional) Form type class/alias for the channel properties if a lookup list is not used,
-     *                        'goalsSupported'       => (optional) array of campaign decisions applicable as successful conversions for this channel
+     *
      *                        'channelTemplate'      => (optional) template to inject UI/DOM into the bottom of the channel's tab
      *                        'formTheme'           => (optional) theme directory for custom form types
      *

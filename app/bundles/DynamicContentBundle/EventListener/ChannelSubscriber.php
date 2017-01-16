@@ -41,12 +41,7 @@ class ChannelSubscriber extends CommonSubscriber
             [
                 MessageModel::CHANNEL_FEATURE => [
                     'lookupFormType' => 'dwc_list',
-                    'goalsSupported' => [
-                        'dwc.decision',
-                        'page.pagehit',
-                        'asset.download',
-                        'form.submit',
-                    ],
+                    'detailView'     => 'MauticDynamicContentBundle:DynamicContent:view',
                 ],
             ]
         );

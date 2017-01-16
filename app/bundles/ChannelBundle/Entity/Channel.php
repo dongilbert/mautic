@@ -11,7 +11,6 @@
 
 namespace Mautic\ChannelBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Mautic\ApiBundle\Serializer\Driver\ApiMetadataDriver;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
@@ -40,11 +39,6 @@ class Channel extends CommonEntity
     private $message;
 
     /**
-     * @var
-     */
-    private $goals;
-
-    /**
      * @var array
      */
     private $properties = [];
@@ -59,7 +53,6 @@ class Channel extends CommonEntity
      */
     public function __construct()
     {
-        $this->goals = new ArrayCollection();
     }
 
     /**
@@ -87,15 +80,6 @@ class Channel extends CommonEntity
                 ->addJoinColumn('message_id', 'id', false, false, 'CASCADE')
                 ->inversedBy('channels')
                 ->build();
-        $builder->createOneToMany('goals', Goal::class)
-                ->mappedBy('channel')
-                ->orphanRemoval()
-                ->setOrderBy(['order' => 'ASC'])
-                ->cascadeMerge()
-                ->cascadePersist()
-                ->cascadeDetach()
-                ->fetchExtraLazy()
-                ->build();
     }
 
     /**
@@ -112,11 +96,6 @@ class Channel extends CommonEntity
                     'channel',
                     'channelId',
                     'message',
-                ]
-            )
-            ->addProperties(
-                [
-                    'goals',
                 ]
             )
             ->build();
@@ -192,45 +171,6 @@ class Channel extends CommonEntity
         $this->message = $message;
 
         return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getGoals()
-    {
-        return $this->goals;
-    }
-
-    /**
-     * @param mixed $goals
-     *
-     * @return Channel
-     */
-    public function setGoals($goals)
-    {
-        $this->goals = $goals;
-
-        return $this;
-    }
-
-    /**
-     * @param Goal $goal
-     */
-    public function addGoal(Goal $goal)
-    {
-        // Ensure channel is set for newly created Goals
-        $goal->setChannel($this);
-
-        $this->goals[] = $goal;
-    }
-
-    /**
-     * @param Goal $goal
-     */
-    public function removeGoal(Goal $goal)
-    {
-        $this->goals->removeElement($goal);
     }
 
     /**

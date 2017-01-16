@@ -233,20 +233,11 @@ class CampaignModel extends CommonFormModel
         $events         =
         $hierarchy      =
         $parentUpdated  = [];
-        //set the events from session
-        $messageRelationship = [];
 
         foreach ($sessionEvents as $properties) {
             $isNew = (!empty($properties['id']) && isset($existingEvents[$properties['id']])) ? false : true;
             $event = !$isNew ? $existingEvents[$properties['id']] : new Event();
 
-            if ($properties['eventType'] == 'message_decision' and !in_array($properties['id'], $deletedEvents)) {
-                $messageRelationship[$properties['id']] = [
-                    'parent'   => $properties['messageParent'],
-                    'decision' => $properties['id'],
-                    'order'    => $properties['order'],
-                ];
-            }
             foreach ($properties as $f => $v) {
                 if ($f == 'id' && strpos($v, 'new') === 0) {
                     //set the temp ID used to be able to match up connections
@@ -335,11 +326,6 @@ class CampaignModel extends CommonFormModel
 
                 // Remove decision so that it doesn't affect execution
                 $events[$id]->setDecisionPath(null);
-            }
-
-            if (isset($messageRelationship[$id])) {
-                $events[$id]->setParent($events[$messageRelationship[$id]['parent']]);
-                $events[$id]->setOrder($messageRelationship[$id]['order']);
             }
         }
 
@@ -450,9 +436,7 @@ class CampaignModel extends CommonFormModel
 
         foreach ($hierarchy as $eventId => $parent) {
             if ($parent == $root || $count === 1) {
-                if ($events[$eventId]->getEventType() != 'message_decision') {
-                    $events[$eventId]->setOrder($order);
-                }
+                $events[$eventId]->setOrder($order);
                 $entity->addEvent($eventId, $events[$eventId]);
                 unset($hierarchy[$eventId]);
                 if (count($hierarchy)) {
@@ -481,7 +465,6 @@ class CampaignModel extends CommonFormModel
             $events['decision']  = $event->getDecisions();
             $events['condition'] = $event->getConditions();
             $events['action']    = $event->getActions();
-            $events['message']   = $event->getMessages();
 
             $associationRestrictions = ['action' => [], 'decision' => []];
             $anchorRestrictions      = [];
@@ -514,9 +497,6 @@ class CampaignModel extends CommonFormModel
                         }
                         $anchorRestrictions[$group][$key][] = $anchor;
                     }
-                }
-                if (isset($action['campaignTypeNotIncluded'])) {
-                    $associationRestrictions['messageActions'][$key] = $action['campaignTypeNotIncluded'];
                 }
             }
 

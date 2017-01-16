@@ -55,7 +55,6 @@ class MessageType extends AbstractFormStandardType
         $message         = $options['data'];
         $channels        = $this->model->getChannels();
         $messageChannels = $message->getChannels();
-        $goals           = [];
 
         foreach ($channels as $channelId => $channel) {
             if (!isset($messageChannels[$channelId])) {
@@ -64,11 +63,6 @@ class MessageType extends AbstractFormStandardType
                         ->setChannel($channelId)
                         ->setMessage($message)
                 );
-            }
-
-            // Set goal prototypes
-            if (isset($channel['goalConfigs'])) {
-                $goals = array_merge($goals, $channel['goalConfigs']);
             }
         }
 
@@ -84,21 +78,10 @@ class MessageType extends AbstractFormStandardType
                 'by_reference'  => false,
                 'entry_options' => [
                     'channels' => $channels,
-                    'goals'    => $goals,
                 ],
                 'constraints' => [
                     new Valid(),
                 ],
-            ]
-        );
-
-        $builder->add(
-            'prototypes',
-            GoalPrototypeType::class,
-            [
-                'mapped' => false,
-                'label'  => false,
-                'goals'  => $goals,
             ]
         );
     }

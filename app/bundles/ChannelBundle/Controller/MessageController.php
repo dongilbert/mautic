@@ -62,6 +62,12 @@ class MessageController extends AbstractStandardFormController
 
                 break;
             case 'view':
+                $viewParameters = [
+                    'channels'         => $model->getChannels(),
+                    'channel_contents' => $model->getChannelMessages($args['viewParameters']['item']->getId()),
+                ];
+
+                break;
             case 'new':
             case 'edit':
             // Check to see if this is a popup
@@ -129,7 +135,16 @@ class MessageController extends AbstractStandardFormController
     {
         return $this->editStandard($objectId, $ignorePost);
     }
-
+    /**
+     * @param      $objectId
+     * @param bool $ignorePost
+     *
+     * @return \Mautic\CoreBundle\Controller\Response|\Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function viewAction($objectId)
+    {
+        return $this->viewStandard($objectId);
+    }
     /**
      * @param $objectId
      *

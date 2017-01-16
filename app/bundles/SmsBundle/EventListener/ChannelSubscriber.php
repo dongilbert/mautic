@@ -40,6 +40,7 @@ class ChannelSubscriber extends CommonSubscriber
                 [
                     MessageModel::CHANNEL_FEATURE => [
                         'lookupFormType' => 'sms_list',
+                        'detailView'     => 'MauticSmsBundle:Sms:view',
                     ],
                     LeadModel::CHANNEL_FEATURE => [],
                 ]

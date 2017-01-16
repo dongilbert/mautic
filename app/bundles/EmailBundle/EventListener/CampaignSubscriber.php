@@ -91,13 +91,12 @@ class CampaignSubscriber extends CommonSubscriber
         $event->addDecision('email.open', $trigger);
 
         $action = [
-            'label'                   => 'mautic.email.campaign.event.send',
-            'description'             => 'mautic.email.campaign.event.send_descr',
-            'eventName'               => EmailEvents::ON_CAMPAIGN_TRIGGER_ACTION,
-            'formType'                => 'emailsend_list',
-            'formTypeOptions'         => ['update_select' => 'campaignevent_properties_email', 'with_email_types' => true],
-            'formTheme'               => 'MauticEmailBundle:FormTheme\EmailSendList',
-            'campaignTypeNotIncluded' => ['email.send'], //these actions are included in the marketing messages and should not be incluced in intelligent campaigns
+            'label'           => 'mautic.email.campaign.event.send',
+            'description'     => 'mautic.email.campaign.event.send_descr',
+            'eventName'       => EmailEvents::ON_CAMPAIGN_TRIGGER_ACTION,
+            'formType'        => 'emailsend_list',
+            'formTypeOptions' => ['update_select' => 'campaignevent_properties_email', 'with_email_types' => true],
+            'formTheme'       => 'MauticEmailBundle:FormTheme\EmailSendList',
         ];
         $event->addAction('email.send', $action);
     }
@@ -121,20 +120,15 @@ class CampaignSubscriber extends CommonSubscriber
      */
     public function onCampaignTriggerDecision(CampaignExecutionEvent $event)
     {
-        $eventDetails  = $event->getEventDetails();
-        $eventParent   = $event->getEvent()['parent'];
-        $campaignEvent = $event->getEvent();
+        $eventDetails = $event->getEventDetails();
+        $eventParent  = $event->getEvent()['parent'];
 
         if ($eventDetails == null) {
             return $event->setResult(false);
         }
 
         //check to see if the parent event is a "send email" event and that it matches the current email opened
-        if (!empty($eventParent) && ($eventParent['type'] === 'email.send' || $eventParent['type'] === 'message.send')) {
-            if (isset($campaignEvent['channelId']) && $eventDetails->getId() === (int) $campaignEvent['channelId']) {
-                return $event->setResult($eventDetails->getId() === (int) $campaignEvent['channelId']);
-            }
-
+        if (!empty($eventParent) && $eventParent['type'] === 'email.send') {
             return $event->setResult($eventDetails->getId() === (int) $eventParent['properties']['email']);
         }
 

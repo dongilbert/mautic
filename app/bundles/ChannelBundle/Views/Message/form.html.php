@@ -37,7 +37,7 @@ foreach ($channels as $channel => $config) {
         $tab['content'] .= $view->render(
             'MauticCoreBundle:FormTheme:entity_properties.html.php',
             [
-                'properties'        => $form['prototypes']->children,
+                'properties'        => [],
                 'idPrefix'          => 'message_prototypes_',
                 'namePrefix'        => 'message[prototypes]',
                 'appendAsPanel'     => true,

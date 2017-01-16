@@ -457,9 +457,8 @@ abstract class AbstractStandardFormController extends AbstractFormController
         $returnUrl = $this->generateUrl($this->getIndexRoute(), ['page' => $page]);
 
         $viewParameters = ['page' => $page];
-        if ($this->template) {
-            $this->template = $this->controllerBase.':index';
-        }
+
+        $this->template = $this->controllerBase.':index';
 
         $postActionVars = [
             'returnUrl'       => $returnUrl,

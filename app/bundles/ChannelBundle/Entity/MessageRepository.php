@@ -64,33 +64,14 @@ class MessageRepository extends CommonRepository
      *
      * @return array
      */
-    public function getMessageGoalsPerChannel($messageId)
-    {
-        $q = $this->_em->getConnection()->createQueryBuilder();
-        $q->from(MAUTIC_TABLE_PREFIX.'message_goals', 'mg')
-            ->select('mg.name, mg.properties, mg.goal_type, mg.goal_order, mc.channel, mc.channel_id')
-            ->join('mg', MAUTIC_TABLE_PREFIX.'message_channels', 'mc', 'mc.id = mg.channel_id')
-            ->where($q->expr()->eq('mc.message_id', ':messageId'))
-            ->setParameter('messageId', $messageId)
-        ->orderBy('mc.channel, mg.goal_order');
-
-        $result = $q->execute()->fetchAll();
-
-        return $result;
-    }
-
-    /**
-     * @param $messageId
-     *
-     * @return array
-     */
     public function getChannelMessages($messageId)
     {
         $q = $this->_em->getConnection()->createQueryBuilder();
         $q->from(MAUTIC_TABLE_PREFIX.'message_channels', 'mc')
             ->select('id, channel, channel_id')
-            ->where($q->expr()->eq('id', ':messageId'))
-            ->setParameter('messageId', $messageId);
+            ->where($q->expr()->eq('message_id', ':messageId'))
+            ->setParameter('messageId', $messageId)
+            ->andWhere($q->expr()->eq('is_enabled', true, 'boolean'));
 
         $result = $q->execute()->fetchAll();
 

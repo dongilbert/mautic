@@ -418,6 +418,7 @@ class EmailController extends FormController
                     'trackables'   => $trackableLinks,
                     'pending'      => $model->getPendingLeads($email, null, true),
                     'logs'         => $logs,
+                    'isEmbedded'   => $this->request->get('isEmbedded'),
                     'variants'     => [
                         'parent'     => $parent,
                         'children'   => $children,

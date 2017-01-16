@@ -24,12 +24,16 @@ $view['slots']->set('actions', $view->render('MauticCoreBundle:Helper:page_actio
 // active, id, name, content
 $tabs   = [];
 $active = true;
+
 foreach ($channels as $channel => $config) {
-    $tab = [
-        'active'  => $active,
-        'id'      => 'channel_'.$channel,
-        'name'    => $config['label'],
-        'content' => $channel,
+    $channelIdKey[$channel] = array_search($channel, array_column($channel_contents, 'channel'));
+    $tab                    = [
+        'active'        => $active,
+        'id'            => 'channel_'.$channel,
+        'name'          => $config['label'],
+        'content'       => ($channelIdKey[$channel] === 0 or $channelIdKey[$channel] > 0) ? $view['actions']->render(new \Symfony\Component\HttpKernel\Controller\ControllerReference($config['detailView'],
+            ['objectId' => $channel_contents[$channelIdKey[$channel]]['channel_id'], 'isEmbedded' => true])) : 'Not Active',
+
     ];
 
     $tabs[] = $tab;
@@ -38,5 +42,10 @@ foreach ($channels as $channel => $config) {
 }
 
 $view['slots']->set('formTabs', $tabs);
+?>
+<?php echo $view->render('MauticCoreBundle:Helper:tabs.html.php', ['tabs' => $tabs]);
+$view['slots']->set('mauticContent', 'message');
+?>
+<?php
 $view['slots']->start('rightFormContent');
 $view['slots']->stop();

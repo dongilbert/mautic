@@ -174,11 +174,9 @@ Mautic.campaignEventOnLoad = function (container, response) {
 
         mQuery(eventId).css({'left': x + 'px', 'top': y + 'px'});
 
-        if (response.eventType == 'decision' || response.eventType == 'condition' || response.eventType == 'message') {
+        if (response.eventType == 'decision' || response.eventType == 'condition') {
             Mautic.campaignBuilderRegisterAnchors(['top', 'yes', 'no'], eventId);
-        }
-
-        if (response.eventType == 'action') {
+        } else {
             Mautic.campaignBuilderRegisterAnchors(['top', 'bottom'], eventId);
         }
 
@@ -401,15 +399,6 @@ Mautic.launchCampaignEditor = function() {
     mQuery('.builder').addClass('builder-active');
     mQuery('.builder').removeClass('hide');
 
-    var campaignMarketingType = mQuery('#campaignType');
-    var typeAnchor = 'decision';
-
-    if (campaignMarketingType.val() == 'intelligent') {
-        typeAnchor = 'message';
-    } else {
-        typeAnchor = 'decision';
-    }
-
     // Center new source
     if (mQuery('#CampaignEvent_newsource').length) {
         Mautic.campaignBuilderPrepareNewSource();
@@ -512,46 +501,54 @@ Mautic.launchCampaignEditor = function() {
                     // target
                     'source': [],
                     'action': ['top'], // target anchors
-                    'condition': ['top']
+                    'condition': ['top'],
+                    'decision': ['top'],
                 },
                 'leadsourceleft': {
                     'source': ['leadsourceright'],
                     'action': [],
-                    'condition': []
+                    'condition': [],
+                    'decision': []
                 },
                 'leadsourceright': {
                     'source': ['leadsourceleft'],
                     'action': [],
-                    'condition': []
+                    'condition': [],
+                    'decision': []
                 }
             },
             'action': {
                 'top': {
                     'source': ['leadsource'],
                     'action': [],
-                    'condition': ['yes', 'no']
+                    'condition': ['yes', 'no'],
+                    'decision': ['yes', 'no']
                 },
                 'bottom': {
                     'source': [],
                     'action': [],
-                    'condition': ['top']
+                    'condition': ['top'],
+                    'decision': ['top']
                 }
             },
             'condition': {
                 'top': {
                     'source': ['leadsource'],
                     'action': ['bottom'],
-                    'condition': ['yes', 'no']
+                    'condition': ['yes', 'no'],
+                    'decision': ['yes', 'no']
                 },
                 'yes': {
                     'source': [],
                     'action': ['top'],
-                    'condition': ['top']
+                    'condition': ['top'],
+                    'decision': ['top']
                 },
                 'no': {
                     'source': [],
                     'action': ['top'],
-                    'condition': ['top']
+                    'condition': ['top'],
+                    'decision': ['top']
                 }
             },
             'decision': {
@@ -559,58 +556,22 @@ Mautic.launchCampaignEditor = function() {
                     'action': ['bottom'],
                     'source': ['leadsource'],
                     'condition': ['yes', 'no'],
-                    'decision': []
+                    'decision': [],
                 },
                 'yes': {
                     'source': [],
                     'action': ['top'],
                     'condition': ['top'],
-                    'decision': []
+                    'decision': [],
                 },
                 'no': {
                     'source': [],
                     'action': ['top'],
                     'condition': ['top'],
-                    'decision': []
-                }
-            },
-            'message': {
-                'top': {
-                    'source': ['leadsource'],
-                    'action': ['yes', 'no','bottom'],
-                    'condition': ['yes', 'no'],
-                    'message' :['yes', 'no'],
-                    'decision': []
-                },
-                'yes': {
-                    'source': [],
-                    'action': ['top'],
-                    'condition': ['top'],
-                    'message': ['top'],
-                    'decision': []
-                },
-                'no': {
-                    'source': [],
-                    'action': ['top'],
-                    'condition': ['top'],
-                    'message': ['top'],
-                    'decision': []
+                    'decision': [],
                 }
             }
         };
-        Mautic.campaignBuilderConnectionsMap['source']['leadsource'][typeAnchor] = ['top'];
-        Mautic.campaignBuilderConnectionsMap['source']['leadsourceleft'][typeAnchor] = [];
-        Mautic.campaignBuilderConnectionsMap['source']['leadsourceright'][typeAnchor] = [];
-        Mautic.campaignBuilderConnectionsMap['action']['top'][typeAnchor] = ['yes', 'no'];
-        Mautic.campaignBuilderConnectionsMap['action']['top'][typeAnchor] = ['yes', 'no'];
-        Mautic.campaignBuilderConnectionsMap['action']['bottom'][typeAnchor] = ['top'];
-        if (campaignMarketingType.val() == 'intelligent') {
-            Mautic.campaignBuilderConnectionsMap['action']['top']['decision'] = ['yes', 'no'];
-            Mautic.campaignBuilderConnectionsMap['action']['bottom']['decision'] = ['top'];
-        }
-        Mautic.campaignBuilderConnectionsMap['condition']['top'][typeAnchor] = ['yes', 'no'];
-        Mautic.campaignBuilderConnectionsMap['condition']['yes'][typeAnchor] = ['top'];
-        Mautic.campaignBuilderConnectionsMap['condition']['no'][typeAnchor] = ['top'];
 
         Mautic.campaignAnchors = {
             'top': [0.5, 0, 0, -1, 0, 0],
@@ -647,8 +608,7 @@ Mautic.launchCampaignEditor = function() {
                     };
 
                     var campaignId = mQuery('#campaignId').val();
-                    var campaignType = mQuery('#campaignType').val();
-                    var query = "action=campaign:updateCoordinates&campaignId=" + campaignId + "&droppedX=" + endingPosition.top + "&droppedY=" + endingPosition.left + "&eventId=" + mQuery(event.target).attr('id') + "campaignType=" + campaignType;
+                    var query = "action=campaign:updateCoordinates&campaignId=" + campaignId + "&droppedX=" + endingPosition.top + "&droppedY=" + endingPosition.left + "&eventId=" + mQuery(event.target).attr('id');
                     mQuery.ajax({
                         url: mauticAjaxUrl,
                         type: "POST",
@@ -675,15 +635,14 @@ Mautic.launchCampaignEditor = function() {
             Mautic.campaignBuilderRegisterAnchors(['top'], this);
         });
 
-        mQuery("#CampaignCanvas div.list-campaign-event").not('.list-campaign-decision').not('.list-campaign-condition').not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').not('.list-campaign-message').each(function () {
+        mQuery("#CampaignCanvas div.list-campaign-event").not('.list-campaign-decision').not('.list-campaign-condition').not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').each(function () {
             Mautic.campaignBuilderRegisterAnchors(['bottom'], this);
         });
-        mQuery("#CampaignCanvas div.list-campaign-decision, #CampaignCanvas div.list-campaign-condition, #CampaignCanvas div.list-campaign-message").each(function () {
+
+        mQuery("#CampaignCanvas div.list-campaign-decision, #CampaignCanvas div.list-campaign-condition").each(function () {
             Mautic.campaignBuilderRegisterAnchors(['yes', 'no'], this);
         });
-        mQuery("#CampaignCanvas div.list-campaign-message").each(function () {
-            Mautic.campaignBuilderRegisterAnchors(['yes', 'no'], this);
-        });
+
         mQuery("#CampaignCanvas div.list-campaign-leadsource").not('#CampaignEvent_newsource').not('#CampaignEvent_newsource_hide').each(function () {
             Mautic.campaignBuilderRegisterAnchors(['leadSource', 'leadSourceLeft', 'leadSourceRight'], this);
         });
@@ -861,8 +820,7 @@ Mautic.closeCampaignBuilder = function() {
     var canvasSettings = {canvasSettings: chart};
 
     var campaignId     = mQuery('#campaignId').val();
-    var campaignType     = mQuery('#campaignType').val();
-    var query          = "action=campaign:updateConnections&campaignId=" + campaignId + "&campaignType=" + campaignType;
+    var query          = "action=campaign:updateConnections&campaignId=" + campaignId;
 
     mQuery('.btn-close-builder').prop('disabled', true);
     mQuery.ajax({
@@ -1282,7 +1240,7 @@ Mautic.campaignBuilderUpdateEventList = function (groups, hidden, view, active, 
         // Force groups mode
         inGroupsView = false;
     }
-    mQuery.each(['Source', 'Action', 'Decision', 'Condition', 'Message'], function (key, theGroup) {
+    mQuery.each(['Source', 'Action', 'Decision', 'Condition'], function (key, theGroup) {
         if (mQuery.inArray(theGroup, groups) !== -1) {
             if (inGroupsView) {
                 mQuery('#' + theGroup + 'GroupSelector').removeClass('hide');
@@ -1396,12 +1354,6 @@ Mautic.campaignBuilderPrepareNewSource = function () {
 Mautic.campaignBuilderValidateConnection = function (epDetails, checkEvent) {
     var valid = true;
 
-    var isIntelligent =  mQuery('#campaignType').val();
-
-    if (isIntelligent == 'intelligent' && typeof Mautic.campaignBuilderConnectionRestrictions['messageActions'][checkEvent] !== 'undefined') {
-        return false;
-    }
-
     if ('source' == epDetails.eventType) {
         // If this is a source, do not show action/decisions that have type restrictions
         if (typeof Mautic.campaignBuilderConnectionRestrictions['action'] !== 'undefined' && typeof Mautic.campaignBuilderConnectionRestrictions['action'][checkEvent] !== 'undefined') {
@@ -1447,20 +1399,4 @@ Mautic.campaignBuilderValidateConnection = function (epDetails, checkEvent) {
     }
 
     return valid;
-};
-
-Mautic.selectCampaignType = function(campaignType) {
-    if (campaignType == 'intelligent') {
-        mQuery('.page-header h3').text(mauticLang.newIntelligentCampaign);
-    } else {
-        mQuery('.page-header h3').text(mauticLang.newManualCampaign);
-    }
-
-    mQuery('#campaign_campaignType').val(campaignType);
-    mQuery('#campaignType').val(campaignType);
-
-    mQuery('body').removeClass('noscroll');
-
-    mQuery('.campaign-type-modal').remove();
-    mQuery('.campaign-type-modal-backdrop').remove();
-};
+}

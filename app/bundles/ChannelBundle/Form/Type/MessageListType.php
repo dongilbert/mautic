@@ -43,7 +43,6 @@ class MessageListType extends AbstractType
                 'lookup_arguments'    => function (Options $options) {
                     return [
                         'type'    => 'message',
-                        'filter'  => '$data',
                         'limit'   => 0,
                         'start'   => 0,
                         'options' => [

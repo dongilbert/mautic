@@ -50,19 +50,14 @@ class CampaignSubscriber extends CommonSubscriber
      */
     public function onCampaignBuild(CampaignBuilderEvent $event)
     {
-        $entities = $this->messageModel->getRepository()->getMessageList();
-
-        foreach ($entities as $entity) {
-            $action = [
-                'label'           => $entity['name'],
-                'description'     => $entity['description'],
-                'eventName'       => ChannelEvents::ON_CAMPAIGN_TRIGGER_ACTION,
-                'formType'        => 'message_send',
-                'messageId'       => $entity['id'],
-                'formTypeOptions' => ['message_id' => $entity['id']],
-            ];
-            $event->addMessage('message.send_'.$entity['name'], $action);
-        }
+        $action = [
+            'label'       => 'mautic.channel.message.send.marketing.message',
+            'description' => 'mautic.channel.message.send.marketing.message.descr',
+            'eventName'   => ChannelEvents::ON_CAMPAIGN_TRIGGER_ACTION,
+            'formType'    => 'message_send',
+            'formTheme'   => 'MauticChannelBundle:FormTheme\MessageSend',
+        ];
+        $event->addAction('message.send', $action);
     }
 
     /**
@@ -71,7 +66,7 @@ class CampaignSubscriber extends CommonSubscriber
     public function onCampaignTriggerAction(CampaignExecutionEvent $event)
     {
         $messageSent     = false;
-        $channelMessages = $this->messageModel->getChannelMessages((int) $event->getConfig()['messageId']);
+        $channelMessages = $this->messageModel->getChannelMessages((int) $event->getConfig()['marketingMessage']);
         $messageEvent    = $event->getEvent();
         $lead            = $event->getLead();
 

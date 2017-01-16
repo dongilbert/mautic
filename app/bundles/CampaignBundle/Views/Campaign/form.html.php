@@ -16,7 +16,6 @@ $header = ($entity->getId()) ?
         ['%name%' => $view['translator']->trans($entity->getName())]) :
     $view['translator']->trans('mautic.campaign.menu.new');
 $view['slots']->set('headerTitle', $header);
-$isExisting = $entity->getId();
 ?>
 
 <?php echo $view['form']->start($form); ?>
@@ -53,37 +52,11 @@ $isExisting = $entity->getId();
     </div>
 </div>
 
-<?php echo $view['form']->end($form);
-?>
+<?php echo $view['form']->end($form); ?>
 <?php echo $view->render('MauticCampaignBundle:Campaign:builder.html.php', [
     'campaignId'      => $form['sessionId']->vars['data'],
-    'campaignType'    => $form['campaignType']->vars['data'],
     'campaignEvents'  => $campaignEvents,
     'campaignSources' => $campaignSources,
     'eventSettings'   => $eventSettings,
     'canvasSettings'  => $entity->getCanvasSettings(),
 ]); ?>
-
-
-<?php
-if (!$isExisting):
-    echo $view->render('MauticCoreBundle:Helper:form_selecttype.html.php',
-        [
-            'item'       => $entity,
-            'mauticLang' => [
-                'newIntelligentCampaign' => 'mautic.campaign.type.intelligent.header',
-                'newManualCampaign'      => 'mautic.campaign.type.manual.header',
-            ],
-            'typePrefix'         => 'campaign',
-            'cancelUrl'          => 'mautic_campaign_index',
-            'header'             => 'mautic.campaign.type.header',
-            'typeOneHeader'      => 'mautic.campaign.type.intelligent.header',
-            'typeOneIconClass'   => 'fa-magic',
-            'typeOneDescription' => 'mautic.campaign.type.intelligent.description',
-            'typeOneOnClick'     => "Mautic.selectCampaignType('intelligent');",
-            'typeTwoHeader'      => 'mautic.campaign.type.manual.header',
-            'typeTwoIconClass'   => 'fa-wrench',
-            'typeTwoDescription' => 'mautic.campaign.type.manual.description',
-            'typeTwoOnClick'     => "Mautic.selectCampaignType('manual');",
-        ]);
-endif;

@@ -34,36 +34,13 @@
             endforeach;
 
             foreach ($campaignEvents as $event):
-                echo $view->render('MauticCampaignBundle:Event:generic.html.php', ['event' => $event, 'campaignId' => $campaignId, 'campaignType' => $campaignType]);
+                echo $view->render('MauticCampaignBundle:Event:generic.html.php', ['event' => $event, 'campaignId' => $campaignId]);
             endforeach;
             ?>
 
             <div class="hide" id="CampaignEventPanel">
                 <div id="CampaignEventPanelGroups">
                     <div class="row">
-                        <div class="mr-0 ml-0 pl-xs pr-xs campaign-group-container col-md-4" id="MessageGroupSelector">
-                            <div class="panel panel-warning mb-0">
-                                <div class="panel-heading">
-                                    <div class="col-xs-8 col-sm-10 np">
-                                        <h3 class="panel-title"><?php echo $view['translator']->trans('mautic.campaign.event.message.header'); ?></h3>
-                                    </div>
-                                    <div class="col-xs-4 col-sm-2 pl-0 pr-0 pt-10 pb-10 text-right">
-                                        <i class="hidden-xs fa fa-random fa-lg"></i>
-                                        <button class="visible-xs pull-right btn btn-sm btn-default btn-nospin text-warning" data-type="Message">
-                                            <?php echo $view['translator']->trans('mautic.core.select'); ?>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="panel-body">
-                                    <?php echo $view['translator']->trans('mautic.campaign.event.message.descr'); ?>
-                                </div>
-                                <div class="hidden-xs panel-footer text-center">
-                                    <button class="btn btn-lg btn-default btn-nospin text-warning" data-type="Message">
-                                        <?php echo $view['translator']->trans('mautic.core.select'); ?>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                         <div class="mr-0 ml-0 pl-xs pr-xs campaign-group-container col-md-4" id="DecisionGroupSelector">
                             <div class="panel panel-success mb-0">
                                 <div class="panel-heading">
@@ -146,7 +123,7 @@
                                     class="option_campaignLeadSource_<?php echo $option; ?>"
                                     data-href="<?php echo $view['router']->path(
                                         'mautic_campaignsource_action',
-                                        ['objectAction' => 'new', 'objectId' => $campaignId, 'sourceType' => $option, 'campaignType' => $campaignType]
+                                        ['objectAction' => 'new', 'objectId' => $campaignId, 'sourceType' => $option]
                                     ); ?>"
                                     data-target="#CampaignEventModal"
                                     title="<?php echo $view->escape($view['translator']->trans('mautic.campaign.leadsource.'.$option.'.tooltip')); ?>"
@@ -159,7 +136,7 @@
                         <?php endforeach; ?>
                         </select>
                     </div>
-                    <?php foreach (['action' => 'primary', 'decision' => 'success', 'condition' => 'danger', 'message' => 'warning'] as $eventGroup => $color): ?>
+                    <?php foreach (['action' => 'primary', 'decision' => 'success', 'condition' => 'danger'] as $eventGroup => $color): ?>
                     <div id="<?php echo ucfirst($eventGroup); ?>GroupList" class="hide">
                         <h4 class="mb-xs">
                             <span><?php echo $view['translator']->trans('mautic.campaign.event.'.$eventGroup.'s.header'); ?></span>
@@ -175,7 +152,7 @@
                                     class="option_campaignEvent_<?php echo str_replace('.', '', $k); ?>"
                                     data-href="<?php echo $view['router']->path(
                                         'mautic_campaignevent_action',
-                                        ['objectAction' => 'new', 'type' => $k, 'eventType' => $eventGroup, 'campaignId' => $campaignId, 'anchor' => '', 'campaignType' => $campaignType]
+                                        ['objectAction' => 'new', 'type' => $k, 'eventType' => $eventGroup, 'campaignId' => $campaignId, 'anchor' => '']
                                     ); ?>"
                                     data-target="#CampaignEventModal"
                                     title="<?php echo $view->escape($e['description']); ?>"
@@ -196,7 +173,6 @@
 <input type="hidden" value="" id="droppedX"/>
 <input type="hidden" value="" id="droppedY"/>
 <input type="hidden" value="<?php echo $campaignId; ?>" id="campaignId"/>
-<input type="hidden" value="<?php echo $campaignType; ?>" id="campaignType"/>
 
 <?php echo $view->render(
     'MauticCoreBundle:Helper:modal.html.php',

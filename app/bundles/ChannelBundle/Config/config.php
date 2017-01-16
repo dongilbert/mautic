@@ -79,7 +79,7 @@ return [
             ],
             'mautic.form.type.message_send' => [
                 'class'     => 'Mautic\ChannelBundle\Form\Type\MessageSendType',
-                'arguments' => 'router',
+                'arguments' => ['router', 'mautic.channel.model.message'],
                 'alias'     => 'message_send',
             ],
         ],

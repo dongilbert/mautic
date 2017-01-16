@@ -41,11 +41,7 @@ class ChannelSubscriber extends CommonSubscriber
             [
                 MessageModel::CHANNEL_FEATURE => [
                     'lookupFormType' => 'notification_list',
-                    'goalsSupported' => [
-                        'page.pagehit',
-                        'asset.download',
-                        'form.submit',
-                    ],
+                    'detailView'     => 'MauticNotificationBundle:Notification:view',
                 ],
             ]
         );

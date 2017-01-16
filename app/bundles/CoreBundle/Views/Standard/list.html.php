@@ -142,7 +142,7 @@ if (count($items)):
                                 <?php endif; ?>
                                 <a data-toggle="ajax" href="<?php echo $view['router']->path(
                                     $actionRoute,
-                                    ['objectId' => $item->getId(), 'objectAction' => 'edit']
+                                    ['objectId' => $item->getId(), 'objectAction' => 'view']
                                 ); ?>">
                                     <?php echo $item->getName(); ?>
                                 </a>

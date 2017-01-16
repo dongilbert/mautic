@@ -36,19 +36,11 @@ class CampaignBuilderEvent extends Event
      * @var array
      */
     private $actions = [];
-    /**
-     * @var array
-     */
-    private $messages = [];
+
     /**
      * @var \Symfony\Bundle\FrameworkBundle\Translation\Translator
      */
     private $translator;
-
-    /**
-     * @var string
-     */
-    private $campaignType;
 
     /**
      * @param \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator
@@ -278,66 +270,5 @@ class CampaignBuilderEvent extends Event
         }
 
         return $this->actions;
-    }
-
-    /**
-     * Get messages.
-     *
-     * @return array
-     */
-    public function getMessages()
-    {
-        static $sorted = false;
-
-        if (empty($sorted)) {
-            uasort(
-                $this->messages,
-                function ($a, $b) {
-                    return strnatcasecmp(
-                        $a['label'],
-                        $b['label']
-                    );
-                }
-            );
-            $sorted = true;
-        }
-
-        return $this->messages;
-    }
-
-    public function addMessage($key, array $action)
-    {
-        if (array_key_exists($key, $this->messages)) {
-            throw new InvalidArgumentException("The key, '$key' is already used by another action. Please use a different key.");
-        }
-
-        //check for required keys and that given functions are callable
-        $this->verifyComponent(
-            ['label', ['eventName', 'callback']],
-            $action,
-            ['callback']
-        );
-
-        //translate the group
-        $action['label']       = $this->translator->trans($action['label']);
-        $action['description'] = (isset($action['description'])) ? $this->translator->trans($action['description']) : '';
-
-        $this->messages[$key] = $action;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCampaignType()
-    {
-        return $this->campaignType;
-    }
-
-    /**
-     * @param string $campaignType
-     */
-    public function setCampaignType($campaignType)
-    {
-        $this->campaignType = $campaignType;
     }
 }

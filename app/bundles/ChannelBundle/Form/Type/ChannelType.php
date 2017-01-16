@@ -21,7 +21,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Valid;
 
 class ChannelType extends AbstractType
 {
@@ -101,36 +100,6 @@ class ChannelType extends AbstractType
                     $propertiesOptions
                 );
             }
-
-            $form->add(
-                'goals',
-                'collection',
-                [
-                    'label'         => false,
-                    'allow_add'     => true,
-                    'allow_delete'  => true,
-                    'prototype'     => false,
-                    'entry_type'    => GoalType::class,
-                    'by_reference'  => false,
-                    'entry_options' => [
-                        'goals' => $options['goals'],
-                    ],
-                    'constraints' => [
-                        new Valid(),
-                    ],
-                ]
-            );
-
-            // Re-index to ensure the qoals stay in the submitted order.
-            $data = $event->getData();
-            if (is_array($data) && isset($data['goals'])) {
-                $order = 1;
-                foreach ($data['goals'] as $key => $goal) {
-                    $data['goals'][$key]['order'] = $order;
-                    ++$order;
-                }
-                $event->setData($data);
-            }
         };
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, $formModifier);
@@ -152,7 +121,7 @@ class ChannelType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired(['channels', 'goals']);
+        $resolver->setRequired(['channels']);
         $resolver->setDefaults(
             [
                 'data_class' => Channel::class,

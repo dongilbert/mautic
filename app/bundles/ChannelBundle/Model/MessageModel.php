@@ -115,23 +115,12 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
      */
     public function getChannels()
     {
-        $availableGoals = $this->campaignModel->getEvents('decision');
-        $channels       = $this->channelListHelper->getFeatureChannels(self::CHANNEL_FEATURE);
+        $channels = $this->channelListHelper->getFeatureChannels(self::CHANNEL_FEATURE);
 
         // Validate channel configs
         foreach ($channels as $channel => $config) {
             if (!isset($config['lookupFormType']) && !isset($config['propertiesFormType'])) {
                 throw new \InvalidArgumentException('lookupFormType and/or propertiesFormType are required for channel '.$channel);
-            }
-
-            $config['goals'] = [];
-            if (isset($config['goalsSupported'])) {
-                foreach ($config['goalsSupported'] as $key => $goal) {
-                    if (isset($availableGoals[$goal])) {
-                        $config['goals'][$goal]       = $availableGoals[$goal]['label'];
-                        $config['goalConfigs'][$goal] = $availableGoals[$goal];
-                    }
-                }
             }
 
             switch (true) {
@@ -186,11 +175,6 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
         }
 
         return $results;
-    }
-
-    public function getMessageGoals($messageId)
-    {
-        return $this->getRepository()->getMessageGoalsPerChannel($messageId);
     }
 
     public function getChannelMessages($messageId)
