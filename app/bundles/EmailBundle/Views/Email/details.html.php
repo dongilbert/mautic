@@ -10,10 +10,10 @@
  */
 if (!$isEmbedded) {
     $view->extend('MauticCoreBundle:Default:content.html.php');
-}
-$view['slots']->set('mauticContent', 'email');
-$view['slots']->set('headerTitle', $email->getName());
 
+    $view['slots']->set('mauticContent', 'email');
+    $view['slots']->set('headerTitle', $email->getName());
+}
 $variantContent = $view->render(
     'MauticCoreBundle:Variant:index.html.php',
     [
@@ -106,6 +106,7 @@ if (!$isEmbedded) {
             ]
         )
     );
+
     $view['slots']->set(
         'publishStatus',
         $view->render('MauticCoreBundle:Helper:publishstatus_badge.html.php', ['entity' => $email])
