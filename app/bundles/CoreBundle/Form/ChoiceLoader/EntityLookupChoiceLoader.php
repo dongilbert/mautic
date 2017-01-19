@@ -130,8 +130,8 @@ class EntityLookupChoiceLoader implements ChoiceLoaderInterface
     }
 
     /**
-     * @param $data
-     * @param $options
+     * @param null $data
+     * @param bool $includeNew
      *
      * @return array
      */
@@ -157,42 +157,55 @@ class EntityLookupChoiceLoader implements ChoiceLoaderInterface
                     },
                     (array) $data
                 );
+            }
 
-                if (!$this->modelFactory->hasModel($modelName)) {
-                    throw new \InvalidArgumentException("$modelName not found as a registered model service.");
-                }
-                $model = $this->modelFactory->getModel($modelName);
-                if (!$model instanceof AjaxLookupModelInterface) {
-                    throw new \InvalidArgumentException(get_class($model).' must implement '.AjaxLookupModelInterface::class);
-                }
+            if (!$this->modelFactory->hasModel($modelName)) {
+                throw new \InvalidArgumentException("$modelName not found as a registered model service.");
+            }
+            $model = $this->modelFactory->getModel($modelName);
+            if (!$model instanceof AjaxLookupModelInterface) {
+                throw new \InvalidArgumentException(get_class($model).' must implement '.AjaxLookupModelInterface::class);
+            }
 
-                $args = (isset($this->options['lookup_arguments'])) ? $this->options['lookup_arguments'] : [];
-                if ($dataPlaceholder = array_search('$data', $args)) {
-                    $args[$dataPlaceholder] = $data;
-                }
+            $args = (isset($this->options['lookup_arguments'])) ? $this->options['lookup_arguments'] : [];
+            if ($dataPlaceholder = array_search('$data', $args)) {
+                $args[$dataPlaceholder] = $data;
+            }
 
-                $choices = [];
-                if (isset($this->options['model_lookup_method'])) {
-                    $choices = call_user_func_array([$model, $this->options['model_lookup_method']], $args);
-                } elseif (isset($this->options['repo_lookup_method'])) {
-                    $choices = call_user_func_array([$model->getRepository(), $this->options['model_lookup_method']], $args);
-                } else {
-                    $alias     = $model->getRepository()->getTableAlias();
-                    $expr      = new ExpressionBuilder($this->connection);
-                    $composite = $expr->andX();
+            $choices = [];
+
+            // Default to 100 records if no data is populated
+            if (empty($data) && isset($args['limit'])) {
+                $args['limit'] = 100;
+            }
+
+            if (isset($this->options['model_lookup_method'])) {
+                $choices = call_user_func_array([$model, $this->options['model_lookup_method']], $args);
+            } elseif (isset($this->options['repo_lookup_method'])) {
+                $choices = call_user_func_array([$model->getRepository(), $this->options['model_lookup_method']], $args);
+            } else {
+                $alias     = $model->getRepository()->getTableAlias();
+                $expr      = new ExpressionBuilder($this->connection);
+                $composite = $expr->andX();
+
+                $limit = 100;
+                if ($data) {
                     $composite->add(
                         $expr->in($alias.'.id', $data)
                     );
-
-                    $validChoices = $model->getRepository()->getSimpleList($composite, [], $labelColumn, $idColumn);
-
-                    foreach ($validChoices as $choice) {
-                        $choices[$choice['value']] = $choice['label'];
+                    if (count($data) > $limit) {
+                        $limit = $data;
                     }
                 }
 
-                $this->choices[$modelName] = $choices;
+                $validChoices = $model->getRepository()->getSimpleList($composite, [], $labelColumn, $idColumn, null, $limit);
+
+                foreach ($validChoices as $choice) {
+                    $choices[$choice['value']] = $choice['label'];
+                }
             }
+
+            $this->choices[$modelName] = $choices;
         }
 
         // must be [$label => $id]

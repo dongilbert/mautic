@@ -27,7 +27,6 @@ class MessageRepository extends CommonRepository
      * @param string $search
      * @param int    $limit
      * @param int    $start
-     * @param bool   $viewOther
      *
      * @return array
      */

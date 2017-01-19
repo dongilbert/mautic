@@ -1253,10 +1253,11 @@ class CommonRepository extends EntityRepository
      * @param string              $labelColumn  Column that houses the label
      * @param string              $valueColumn  Column that houses the value
      * @param string              $extraColumns String of extra select columns
+     * @param int                 $limit        Limit for results
      *
      * @return array
      */
-    public function getSimpleList(CompositeExpression $expr = null, array $parameters = [], $labelColumn = null, $valueColumn = 'id', $extraColumns = null)
+    public function getSimpleList(CompositeExpression $expr = null, array $parameters = [], $labelColumn = null, $valueColumn = 'id', $extraColumns = null, $limit = 0)
     {
         $q = $this->_em->getConnection()->createQueryBuilder();
 
@@ -1297,6 +1298,10 @@ class CommonRepository extends EntityRepository
                 $q->expr()->eq($prefix.'is_published', ':true')
             )
                 ->setParameter('true', true, 'boolean');
+        }
+
+        if ($limit) {
+            $q->setMaxResults((int) $limit);
         }
 
         return $q->execute()->fetchAll();
