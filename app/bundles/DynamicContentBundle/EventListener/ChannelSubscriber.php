@@ -39,10 +39,12 @@ class ChannelSubscriber extends CommonSubscriber
         $event->addChannel(
             'dynamicContent',
             [
+                /*
                 MessageModel::CHANNEL_FEATURE => [
                     'lookupFormType' => 'dwc_list',
                     'detailView'     => 'MauticDynamicContentBundle:DynamicContent:view',
                 ],
+                */
             ]
         );
     }
