@@ -172,8 +172,6 @@ class EntityLookupChoiceLoader implements ChoiceLoaderInterface
                 $args[$dataPlaceholder] = $data;
             }
 
-            $choices = [];
-
             // Default to 100 records if no data is populated
             if (empty($data) && isset($args['limit'])) {
                 $args['limit'] = 100;
@@ -182,7 +180,7 @@ class EntityLookupChoiceLoader implements ChoiceLoaderInterface
             if (isset($this->options['model_lookup_method'])) {
                 $choices = call_user_func_array([$model, $this->options['model_lookup_method']], $args);
             } elseif (isset($this->options['repo_lookup_method'])) {
-                $choices = call_user_func_array([$model->getRepository(), $this->options['model_lookup_method']], $args);
+                $choices = call_user_func_array([$model->getRepository(), $this->options['repo_lookup_method']], $args);
             } else {
                 $alias     = $model->getRepository()->getTableAlias();
                 $expr      = new ExpressionBuilder($this->connection);
@@ -198,10 +196,42 @@ class EntityLookupChoiceLoader implements ChoiceLoaderInterface
                     }
                 }
 
-                $validChoices = $model->getRepository()->getSimpleList($composite, [], $labelColumn, $idColumn, null, $limit);
+                $choices = $model->getRepository()->getSimpleList($composite, [], $labelColumn, $idColumn, null, $limit);
+            }
 
-                foreach ($validChoices as $choice) {
-                    $choices[$choice['value']] = $choice['label'];
+            // Build choice list in case of different formats
+            if (!empty($choices)) {
+                // Get the first key
+                reset($choices);
+                $firstKey = key($choices);
+
+                if (is_array($choices[$firstKey])) {
+                    $validChoices = [];
+
+                    // Check if this is value/label formatted
+                    if (!array_key_exists('value', $choices[$firstKey])) {
+                        // Grouped choices so check the first key of the first group
+                        foreach ($choices as $groupKey => $groupChoices) {
+                            $validChoices[$groupKey] = [];
+                            if (!empty($groupChoices)) {
+                                foreach ($groupChoices as $label => $choice) {
+                                    // Grouped values are keyed by label on purpose
+                                    if (is_array($choice) && array_key_exists('value', $choice)) {
+                                        $validChoices[$groupKey][$choice['label']] = $choice['choice'];
+                                    } else {
+                                        $validChoices[$groupKey][$label] = $choice;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        foreach ($choices as $choice) {
+                            // Non-grouped are keyed by value on purpose
+                            $validChoices[$choice['value']] = $choice['label'];
+                        }
+                    }
+
+                    $choices = $validChoices;
                 }
             }
 
