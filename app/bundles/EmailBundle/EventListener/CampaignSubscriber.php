@@ -97,6 +97,8 @@ class CampaignSubscriber extends CommonSubscriber
             'formType'        => 'emailsend_list',
             'formTypeOptions' => ['update_select' => 'campaignevent_properties_email', 'with_email_types' => true],
             'formTheme'       => 'MauticEmailBundle:FormTheme\EmailSendList',
+            'channel'         => 'email',
+            'channelIdField'  => 'email',
         ];
         $event->addAction('email.send', $action);
     }

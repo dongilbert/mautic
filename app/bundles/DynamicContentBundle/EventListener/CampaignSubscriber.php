@@ -82,6 +82,8 @@ class CampaignSubscriber extends CommonSubscriber
                 'hideTriggerMode'     => true,
                 'associatedDecisions' => ['dwc.decision'],
                 'anchorRestrictions'  => ['decision.inaction'],
+                'channel'             => 'dynamicContent',
+                'channelIdField'      => 'dwc_slot_name',
             ]
         );
 
@@ -94,6 +96,8 @@ class CampaignSubscriber extends CommonSubscriber
                 'formType'        => 'dwcdecision_list',
                 'formTypeOptions' => ['update_select' => 'campaignevent_properties_dynamicContent'],
                 'formTheme'       => 'MauticDynamicContentBundle:FormTheme\DynamicContentDecisionList',
+                'channel'         => 'dynamicContent',
+                'channelIdField'  => 'dynamicContent',
 
             ]
         );

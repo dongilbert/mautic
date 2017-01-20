@@ -229,6 +229,7 @@ class CampaignModel extends CommonFormModel
      */
     public function setEvents(Campaign $entity, $sessionEvents, $sessionConnections, $deletedEvents)
     {
+        $eventSettings  = $this->getEvents();
         $existingEvents = $entity->getEvents()->toArray();
         $events         =
         $hierarchy      =
@@ -253,6 +254,8 @@ class CampaignModel extends CommonFormModel
                     $event->$func($v);
                 }
             }
+
+            $this->setChannelFromEventProperties($event, $properties, $eventSettings[$properties['eventType']]);
 
             $event->setCampaign($entity);
             $events[$properties['id']] = $event;
@@ -348,6 +351,37 @@ class CampaignModel extends CommonFormModel
         }
 
         return $events;
+    }
+
+    /**
+     * @param $entity
+     * @param $properties
+     * @param $eventSettings
+     *
+     * @return bool
+     */
+    public function setChannelFromEventProperties($entity, $properties, &$eventSettings)
+    {
+        $channelSet = false;
+        if (!empty($eventSettings[$properties['type']]['channel'])) {
+            $entity->setChannel($eventSettings[$properties['type']]['channel']);
+            if (isset($eventSettings[$properties['type']]['channelIdField'])) {
+                $channelIdField = $eventSettings[$properties['type']]['channelIdField'];
+                if (!empty($properties['properties'][$channelIdField])) {
+                    if (is_array($properties['properties'][$channelIdField])) {
+                        if (count($properties['properties'][$channelIdField]) === 1) {
+                            // Only store channel ID if a single item was selected
+                            $entity->setChannelId($properties['properties'][$channelIdField]);
+                        }
+                    } else {
+                        $entity->setChannelId($properties['properties'][$channelIdField]);
+                    }
+                }
+            }
+            $channelSet = true;
+        }
+
+        return $channelSet;
     }
 
     /**

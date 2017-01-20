@@ -143,7 +143,8 @@ class Event
         $builder->setTable('campaign_events')
             ->setCustomRepositoryClass('Mautic\CampaignBundle\Entity\EventRepository')
             ->addIndex(['type', 'event_type'], 'campaign_event_type_search')
-            ->addIndex(['event_type'], 'event_type');
+            ->addIndex(['event_type'], 'event_type')
+            ->addIndex(['channel', 'channel_id'], 'channel');
 
         $builder->addIdColumns();
 
@@ -702,6 +703,6 @@ class Event
      */
     public function setChannelId($channelId)
     {
-        $this->channelId = $channelId;
+        $this->channelId = (int) $channelId;
     }
 }
