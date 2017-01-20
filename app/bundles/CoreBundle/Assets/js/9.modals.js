@@ -36,7 +36,6 @@ Mautic.ajaxifyModal = function (el, event) {
         mQuery(el).removeAttr('data-prevent-dismiss');
     }
 
-
     Mautic.loadAjaxModal(target, route, method, header, footer, preventDismissal);
 };
 
@@ -115,7 +114,9 @@ Mautic.loadAjaxModal = function (target, route, method, header, footer, preventD
 
     mQuery(target).modal('show');
 
-    if (typeof Mautic.modalContentXhr[target] != 'undefined') {
+    if (typeof Mautic.modalContentXhr == 'undefined') {
+        Mautic.modalContentXhr = {};
+    } else if (typeof Mautic.modalContentXhr[target] != 'undefined') {
         Mautic.modalContentXhr[target].abort();
     }
 
@@ -308,7 +309,6 @@ Mautic.showConfirmation = function (el) {
     });
 
     mQuery('.confirmation-modal').modal('show');
-
 };
 
 /**

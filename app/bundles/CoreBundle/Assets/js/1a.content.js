@@ -95,7 +95,8 @@ Mautic.loadContent = function (route, link, method, target, showPageLoading, cal
  *
  * @param route
  */
-Mautic.generatePageTitle = function(route) {
+Mautic.generatePageTitle = function(route){
+
     if( -1 !== route.indexOf('view') ){
         //loading view of module title
         var currentModule = route.split('/')[3];
@@ -157,6 +158,9 @@ Mautic.processPageContent = function (response) {
             //update URL in address bar
             MauticVars.manualStateChange = false;
             History.pushState(null, "Mautic", response.route);
+
+            //update Title
+            Mautic.generatePageTitle( response.route );
         }
 
         if (response.target == '#app-content') {
@@ -273,13 +277,7 @@ Mautic.onPageLoad = function (container, response, inModal) {
     mQuery(container + " a[data-toggle='download']").on('click.download', function (event) {
         event.preventDefault();
 
-        var link = mQuery(this).attr('href');
-
-        //initialize download links
-        var iframe = mQuery("<iframe/>").attr({
-            src: link,
-            style: "visibility:hidden;display:none"
-        }).appendTo(mQuery('body'));
+        Mautic.initiateFileDownload(mQuery(this).attr('href'));
     });
 
     mQuery(container + " a[data-toggle='confirmation']").off('click.confirmation');
@@ -504,7 +502,7 @@ Mautic.onPageLoad = function (container, response, inModal) {
                 editor.popups.hideAll();
             });
 
-            var maxButtons = ['undo', 'redo', '|', 'bold', 'italic', 'underline', 'paragraphFormat', 'fontFamily', 'fontSize', 'color', 'align', 'orderedList', 'unorderedList', 'quote', 'clearFormatting', 'insertLink', 'insertImage', 'insertGatedVideo', 'insertTable', 'html', 'fullscreen'];
+            var maxButtons = ['undo', 'redo', '|', 'bold', 'italic', 'underline', 'paragraphFormat', 'fontFamily', 'fontSize', 'color', 'align', 'formatOL', 'formatUL', 'quote', 'clearFormatting', 'insertLink', 'insertImage', 'insertGatedVideo', 'insertTable', 'html', 'fullscreen'];
             var minButtons = ['undo', 'redo', '|', 'bold', 'italic', 'underline'];
 
             if (textarea.hasClass('editor-email')) {
@@ -516,7 +514,7 @@ Mautic.onPageLoad = function (container, response, inModal) {
             }
 
             if (textarea.hasClass('editor-dynamic-content')) {
-                minButtons = ['undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontFamily', 'fontSize', 'color', 'align', 'orderedList', 'unorderedList', 'quote', 'clearFormatting', 'insertLink', 'insertImage'];
+                minButtons = ['undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontFamily', 'fontSize', 'color', 'align', 'formatOL', 'formatUL', 'quote', 'clearFormatting', 'insertLink', 'insertImage'];
             }
 
             if (textarea.hasClass('editor-advanced') || textarea.hasClass('editor-basic-fullpage')) {
@@ -738,7 +736,6 @@ Mautic.onPageUnload = function (container, response) {
             delete Mautic.loadedContent[contentSpecific];
         }
     }
-
 };
 
 /**
@@ -755,6 +752,11 @@ Mautic.ajaxifyLink = function (el, event) {
     var route = mQuery(el).attr('href');
     if (route.indexOf('javascript') >= 0 || MauticVars.routeInProgress === route) {
         return false;
+    }
+
+    if (route.indexOf('batchExport') >= 0) {
+        Mautic.initiateFileDownload(route);
+        return true;
     }
 
     if (event.ctrlKey || event.metaKey) {
@@ -871,6 +873,14 @@ Mautic.activateChosenSelect = function(el, ignoreGlobal) {
                 jsonTermKey: searchTerm,
                 keepTypingMsg: "Keep typing...",
                 lookingForMsg: "Looking for"
+            }, function (data) {
+                var results = [];
+
+                mQuery.each(data, function (i, val) {
+                    results.push({value: val.value, text: val.text});
+                });
+
+                return results;
             });
         }
     }
@@ -1564,4 +1574,17 @@ Mautic.closeGlobalSearchResults = function () {
     mQuery('#globalSearchContainer').removeClass('active');
     mQuery('#globalSearchDropdown').removeClass('open');
     mQuery('body').off('click.globalsearch');
+};
+
+/**
+ * Download a link via iframe
+ *
+ * @param link
+ */
+Mautic.initiateFileDownload = function (link) {
+    //initialize download links
+    var iframe = mQuery("<iframe/>").attr({
+        src: link,
+        style: "visibility:hidden;display:none"
+    }).appendTo(mQuery('body'));
 };

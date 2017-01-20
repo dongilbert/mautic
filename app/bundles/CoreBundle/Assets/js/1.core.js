@@ -99,11 +99,18 @@ var Mautic = {
 
     keyboardShortcutHtml: {},
 
+    /**
+     *
+     * @param sequence
+     * @param description
+     * @param func
+     * @param section
+     */
     addKeyboardShortcut: function (sequence, description, func, section) {
         Mousetrap.bind(sequence, func);
         var sectionName = section || 'global';
 
-        if (! Mautic.keyboardShortcutHtml.hasOwnProperty(sectionName)) {
+        if (!Mautic.keyboardShortcutHtml.hasOwnProperty(sectionName)) {
             Mautic.keyboardShortcutHtml[sectionName] = {};
         }
 
@@ -118,7 +125,7 @@ var Mautic = {
             mQuery('#mautic_dashboard_index').click();
         });
 
-        Mautic.addKeyboardShortcut('shift+c', 'Load Contacts',  function(e) {
+        Mautic.addKeyboardShortcut('shift+c', 'Load Contacts', function (e) {
             mQuery('#mautic_contact_index').click();
         });
 
@@ -138,17 +145,17 @@ var Mautic = {
             var modalWindow = mQuery('#MauticSharedModal');
 
             modalWindow.find('.modal-title').html('Keyboard Shortcuts');
-            modalWindow.find('.modal-body').html(function() {
+            modalWindow.find('.modal-body').html(function () {
                 var modalHtml = '';
                 var sections = Object.keys(Mautic.keyboardShortcutHtml);
-                sections.forEach(function(section) {
+                sections.forEach(function (section) {
                     var sectionTitle = (section + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function ($1) {
                         return $1.toUpperCase();
                     });
                     modalHtml += '<h4>' + sectionTitle + '</h4><br />';
                     modalHtml += '<div class="row">';
                     var sequences = Object.keys(Mautic.keyboardShortcutHtml[section]);
-                    sequences.forEach(function(sequence) {
+                    sequences.forEach(function (sequence) {
                         modalHtml += Mautic.keyboardShortcutHtml[section][sequence];
                     });
                     modalHtml += '</div><hr />';
@@ -197,12 +204,12 @@ var Mautic = {
         });
 
         Mautic.browserNotifier = {
-            isSupported:     notify.isSupported,
+            isSupported: notify.isSupported,
             permissionLevel: notify.permissionLevel()
         };
 
-        Mautic.browserNotifier.isSupported        = notify.isSupported;
-        Mautic.browserNotifier.permissionLevel    = notify.permissionLevel();
+        Mautic.browserNotifier.isSupported = notify.isSupported;
+        Mautic.browserNotifier.permissionLevel = notify.permissionLevel();
         Mautic.browserNotifier.createNotification = function (title, options) {
             return notify.createNotification(title, options);
         }
@@ -230,7 +237,7 @@ var Mautic = {
     /**
      * Activate page loading bar
      */
-    startPageLoadingBar: function() {
+    startPageLoadingBar: function () {
         mQuery('.loading-bar').addClass('active');
         MauticVars.activeRequests++;
     },
@@ -270,8 +277,8 @@ var Mautic = {
      *
      * @param el
      */
-    activateLabelLoadingIndicator: function(el) {
-        var labelSpinner    = mQuery("label[for='"+el+"']");
+    activateLabelLoadingIndicator: function (el) {
+        var labelSpinner = mQuery("label[for='" + el + "']");
         Mautic.labelSpinner = mQuery('<i class="fa fa-fw fa-spinner fa-spin"></i>');
         labelSpinner.append(Mautic.labelSpinner);
     },
@@ -279,7 +286,7 @@ var Mautic = {
     /**
      * Remove the spinner from label
      */
-    removeLabelLoadingIndicator: function() {
+    removeLabelLoadingIndicator: function () {
         mQuery(Mautic.labelSpinner).remove();
     },
 
@@ -290,14 +297,9 @@ var Mautic = {
     loadNewWindow: function (options) {
         if (options.windowUrl) {
             Mautic.startModalLoadingBar();
-            var windowName = 'mauticpopup';
-
-            if (options.windowName) {
-                windowName = options.windowName;
-            }
 
             setTimeout(function () {
-                var opener = window.open(options.windowUrl, windowName, 'height=600,width=1100');
+                var opener = window.open(options.windowUrl, 'mauticpopup', 'height=600,width=1100');
 
                 if (!opener || opener.closed || typeof opener.closed == 'undefined') {
                     alert(mauticLang.popupBlockerMessage);
@@ -335,7 +337,7 @@ var Mautic = {
         // Note that asset has been appended
         Mautic.headLoadedAssets[url] = 1;
 
-        mQuery.getScript(url, function( data, textStatus, jqxhr ) {
+        mQuery.getScript(url, function (data, textStatus, jqxhr) {
             if (textStatus == 'success') {
                 if (onLoadCallback && typeof Mautic[onLoadCallback] == 'function') {
                     Mautic[onLoadCallback]();
@@ -436,9 +438,9 @@ var Mautic = {
      *
      * @param url
      */
-    redirectWithBackdrop: function(url) {
+    redirectWithBackdrop: function (url) {
         Mautic.activateBackdrop();
-        setTimeout(function() {
+        setTimeout(function () {
             window.location = url;
         }, 50);
     },
@@ -446,7 +448,7 @@ var Mautic = {
     /**
      * Acivates a backdrop
      */
-    activateBackdrop: function(hideWait) {
+    activateBackdrop: function (hideWait) {
         if (!mQuery('#mautic-backdrop').length) {
             var container = mQuery('<div />', {
                 id: 'mautic-backdrop'
@@ -470,7 +472,7 @@ var Mautic = {
     /**
      * Deactivates backdrop
      */
-    deactivateBackgroup: function() {
+    deactivateBackgroup: function () {
         if (mQuery('#mautic-backdrop').length) {
             mQuery('#mautic-backdrop').remove();
         }
@@ -481,7 +483,7 @@ var Mautic = {
      *
      * @param action
      */
-    executeAction: function (action) {
+    executeAction: function (action, callback) {
         if (typeof Mautic.activeActions == 'undefined') {
             Mautic.activeActions = {};
         } else if (typeof Mautic.activeActions[action] != 'undefined') {
@@ -493,6 +495,12 @@ var Mautic = {
 
         //dismiss modal if activated
         Mautic.dismissConfirmation();
+
+        if (action.indexOf('batchExport') >= 0) {
+            Mautic.initiateFileDownload(action);
+            return;
+        }
+
         mQuery.ajax({
             showLoadingBar: true,
             url: action,
@@ -500,11 +508,15 @@ var Mautic = {
             dataType: "json",
             success: function (response) {
                 Mautic.processPageContent(response);
+
+                if (typeof callback == 'function') {
+                    callback(response);
+                }
             },
             error: function (request, textStatus, errorThrown) {
                 Mautic.processAjaxError(request, textStatus, errorThrown);
             },
-            complete: function() {
+            complete: function () {
                 delete Mautic.activeActions[action]
             }
         });
@@ -762,7 +774,7 @@ var Mautic = {
      * @param successClosure
      * @param showLoadingBar
      */
-    ajaxActionRequest: function(action, data, successClosure, showLoadingBar) {
+    ajaxActionRequest: function (action, data, successClosure, showLoadingBar) {
         if (typeof Mautic.ajaxActionXhr == 'undefined') {
             Mautic.ajaxActionXhr = {};
         } else if (typeof Mautic.ajaxActionXhr[action] != 'undefined') {
@@ -791,5 +803,5 @@ var Mautic = {
                 delete Mautic.ajaxActionXhr[action];
             }
         });
-    },
+    }
 };
