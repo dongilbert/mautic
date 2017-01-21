@@ -96,32 +96,7 @@ class EventController extends CommonFormController
                     $modifiedEvents = $session->get('mautic.campaign.'.$campaignId.'.events.modified');
                     $formData       = $form->getData();
                     $event          = array_merge($event, $formData);
-                    if ($event['eventType'] === 'message' and isset($event['settings']['messageId'])) {
-                        $messageSubEvents = $this->getModel('channel.message')->getMessageGoals($event['settings']['messageId']);
-                        if (!empty($messageSubEvents)) {
-                            foreach ($messageSubEvents as $messageSubEvent) {
-                                $subKeyId                  = 'new'.hash('sha1', uniqid(mt_rand()));
-                                $modifiedEvents[$subKeyId] = [
-                                    'name'                => $messageSubEvent['name'],
-                                    'type'                => $messageSubEvent['goal_type'],
-                                    'eventType'           => 'message_decision',
-                                    'campaignId'          => $campaignId,
-                                    'triggerDate'         => $event['triggerDate'],
-                                    'triggerInterval'     => $event['triggerInterval'],
-                                    'triggerIntervalUnit' => $event['triggerIntervalUnit'],
-                                    'triggerMode'         => $event['triggerMode'],
-                                    'channel'             => $messageSubEvent['channel'],
-                                    'channelId'           => $messageSubEvent['channel_id'],
-                                    'properties'          => json_decode($messageSubEvent['properties'], true),
-                                    'order'               => $messageSubEvent['goal_order'],
-                                    'messageParent'       => $keyId,
-                                    'tempId'              => $subKeyId,
-                                    'id'                  => $subKeyId,
-                                ];
-                            }
-                        }
-                    }
-                    $event['id'] = $event['tempId'] = $keyId;
+                    $event['id']    = $event['tempId']    = $keyId;
                     if (empty($event['name'])) {
                         //set it to the event default
                         $event['name'] = $this->get('translator')->trans($event['settings']['label']);

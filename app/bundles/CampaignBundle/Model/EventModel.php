@@ -876,7 +876,7 @@ class EventModel extends CommonFormModel
                 $this->logger->debug(
                     'CAMPAIGN: Listener handled event for '.ucfirst($event['eventType']).' ID# '.$event['id'].' for contact ID# '.$lead->getId()
                 );
-            } elseif ($response === false && ($event['eventType'] == 'action' || $event['eventType'] == 'message')) {
+            } elseif ($response === false && $event['eventType'] == 'action') {
                 $result = false;
                 $debug  = 'CAMPAIGN: '.ucfirst($event['eventType']).' ID# '.$event['id'].' for contact ID# '.$lead->getId().' failed with a response of '.var_export($response, true);
 
