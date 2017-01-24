@@ -34,7 +34,7 @@ class LeadApiController extends CommonApiController
         $this->entityNameOne    = 'contact';
         $this->entityNameMulti  = 'contacts';
         $this->permissionBase   = 'lead:leads';
-        $this->serializerGroups = ['leadDetails', 'userList', 'publishDetails', 'ipAddress', 'tagList'];
+        $this->serializerGroups = ['leadDetails', 'frequencyRulesList', 'doNotContactList', 'userList', 'publishDetails', 'ipAddress', 'tagList'];
     }
 
     /**
@@ -428,8 +428,10 @@ class LeadApiController extends CommonApiController
     /**
      * Adds a DNC to the contact.
      *
-     * @param int    $id
-     * @param string $channel
+     * @param $id
+     * @param $channel
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function addDncAction($id, $channel)
     {
@@ -459,8 +461,10 @@ class LeadApiController extends CommonApiController
     /**
      * Removes a DNC from the contact.
      *
-     * @param int $id
-     * @param int $channel
+     * @param $id
+     * @param $channel
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function removeDncAction($id, $channel)
     {

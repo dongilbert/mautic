@@ -161,6 +161,13 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
     private $primaryCompany;
 
     /**
+     * Used to determine order of preferred channels.
+     *
+     * @var array
+     */
+    private $preferredChannels = [];
+
+    /**
      * Constructor.
      */
     public function __construct()
@@ -344,6 +351,7 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
                     'dateIdentified',
                     'preferredProfileImage',
                     'doNotContact',
+                    'frequencyRules',
                 ]
             )
             ->build();
@@ -1271,7 +1279,7 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
     /**
      * Get frequency rules.
      *
-     * @return array
+     * @return ArrayCollection
      */
     public function getFrequencyRules()
     {
@@ -1346,5 +1354,85 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
         $this->primaryCompany = $primaryCompany;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPreferredChannels()
+    {
+        if (empty($this->preferredChannels)) {
+            $rules       = $this->getFrequencyRules()->toArray();
+            $dnc         = $this->getDoNotContact();
+            $dncChannels = [];
+            /** @var DoNotContact $record */
+            foreach ($dnc as $record) {
+                $dncChannels[] = $record->getChannel();
+            }
+
+            /* @var FrequencyRule $rule */
+            usort(
+                $rules,
+                function (FrequencyRule $a, FrequencyRule $b) use ($dncChannels) {
+                    $channel = $a->getChannel();
+
+                    if (in_array($channel, $dncChannels)) {
+                        // Channel in DNC so give lower preference
+                        return -1;
+                    }
+
+                    $aPausedFrom = $a->getPauseFromDate();
+                    $aPausedTo = $a->getPauseToDate();
+                    $now = new \DateTime();
+                    if ($aPausedFrom >= $now && $now <= $aPausedTo) {
+                        // A is paused so give lower preference
+                        return -1;
+                    }
+
+                    $aPreferred = $a->getPreferredChannel();
+                    $bPreferred = $a->getPreferredChannel();
+                    if ($aPreferred === $bPreferred) {
+                        // Order by which ever can be sent more frequent
+                        if ($a->getFrequencyTime() === $b->getFrequencyTime()) {
+                            if ($a->getFrequencyNumber() === $b->getFrequencyNumber()) {
+                                return 0;
+                            }
+
+                            return ($a->getFrequencyNumber() < $b->getFrequencyNumber()) ? -1 : 1;
+                        } else {
+                            $convertTime = function ($number, $unit) {
+                                switch ($unit) {
+                                    case FrequencyRule::TIME_WEEK:
+                                        $number = $number * 7;
+                                        break;
+                                    case FrequencyRule::TIME_MONTH:
+                                        $number = $number * 30;
+                                        break;
+                                }
+
+                                return $number;
+                            };
+
+                            $aFrequency = $convertTime($a->getFrequencyNumber(), $a->getFrequencyTime());
+                            $bFrequency = $convertTime($b->getFrequencyNumber(), $b->getFrequencyTime());
+
+                            if ($aFrequency === $bFrequency) {
+                                return 0;
+                            }
+
+                            return ($aFrequency < $bFrequency) ? -1 : 1;
+                        }
+                    }
+
+                    return ($aPreferred < $bPreferred) ? -1 : 1;
+                }
+            );
+
+            foreach ($rules as $rule) {
+                $this->preferredChannels[$rule->getChannel()] = $rule;
+            }
+        }
+
+        return $this->preferredChannels;
     }
 }

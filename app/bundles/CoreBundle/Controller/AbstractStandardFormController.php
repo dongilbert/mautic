@@ -76,11 +76,9 @@ abstract class AbstractStandardFormController extends AbstractFormController
     abstract protected function setStandardFrontendVariables();
 
     /**
-     * @param int    $id
-     * @param string $modelName
-     * @param int    $page
+     * @param int $page
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     protected function indexStandard($page = 1)
     {
@@ -312,9 +310,9 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Generates new form and processes post data.
+     * @return array|\Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @throws \Exception
      */
     protected function newStandard()
     {
@@ -424,12 +422,12 @@ abstract class AbstractStandardFormController extends AbstractFormController
     }
 
     /**
-     * Generates edit form and processes post data.
-     *
-     * @param int  $objectId
+     * @param      $objectId
      * @param bool $ignorePost
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Exception
      */
     protected function editStandard($objectId, $ignorePost = false)
     {

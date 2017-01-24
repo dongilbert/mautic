@@ -12,6 +12,7 @@
 namespace Mautic\LeadBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Mautic\ApiBundle\Serializer\Driver\ApiMetadataDriver;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 
 /**
@@ -19,6 +20,10 @@ use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
  */
 class FrequencyRule
 {
+    const TIME_DAY   = 'DAY';
+    const TIME_WEEK  = 'WEEK';
+    const TIME_MONTH = 'MONTH';
+
     /**
      * @var int
      */
@@ -108,6 +113,33 @@ class FrequencyRule
     }
 
     /**
+     * Prepares the metadata for API usage.
+     *
+     * @param $metadata
+     */
+    public static function loadApiMetadata(ApiMetadataDriver $metadata)
+    {
+        $metadata->setGroupPrefix('frequencyRules')
+                 ->addListProperties(
+                     [
+                         'channel',
+                         'frequencyNumber',
+                         'frequencyTime',
+                         'preferredChannel',
+                         'pauseFromDate',
+                         'pauseToDate',
+                     ]
+                 )
+                 ->addProperties(
+                     [
+                         'lead',
+                         'dateAdded',
+                     ]
+                 )
+                 ->build();
+    }
+
+    /**
      * @return string
      */
     public function getChannel()
@@ -121,24 +153,6 @@ class FrequencyRule
     public function setChannel($channel)
     {
         $this->channel = $channel;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getChannelId()
-    {
-        return $this->channelId;
-    }
-
-    /**
-     * @param mixed $channelId
-     *
-     * @return DoNotContact
-     */
-    public function setChannelId($channelId)
-    {
-        $this->channelId = $channelId;
     }
 
     /**

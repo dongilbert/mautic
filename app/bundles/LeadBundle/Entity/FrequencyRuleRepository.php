@@ -21,7 +21,6 @@ class FrequencyRuleRepository extends CommonRepository
     /**
      * @param $channel
      * @param $leadIds
-     * @param $listId
      * @param $defaultFrequencyNumber
      * @param $defaultFrequencyTime
      *
@@ -91,7 +90,7 @@ class FrequencyRuleRepository extends CommonRepository
     {
         $q = $this->_em->getConnection()->createQueryBuilder();
 
-        $q->select('fr.id, fr.frequency_time, fr.frequency_number, fr.channel, fr.pause_from_date, fr.pause_to_date')
+        $q->select('fr.id, fr.frequency_time, fr.frequency_number, fr.channel, fr.preferred_channel, fr.pause_from_date, fr.pause_to_date')
             ->from(MAUTIC_TABLE_PREFIX.'lead_frequencyrules', 'fr');
 
         if ($channel) {
@@ -106,7 +105,13 @@ class FrequencyRuleRepository extends CommonRepository
 
         $results = $q->execute()->fetchAll();
 
-        return $results;
+        $frequencyRules = [];
+
+        foreach ($results as $result) {
+            $frequencyRules[$result['channel']] = $result;
+        }
+
+        return $frequencyRules;
     }
 
     public function getPreferredChannel($leadId)

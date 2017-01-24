@@ -436,7 +436,7 @@ class CommonApiController extends FOSRestController implements MauticController
             $msg        = $this->getFormErrorMessage($formErrors);
 
             if (!$msg) {
-                $msg = 'Request data are not valid';
+                $msg = $this->translator->trans('mautic.core.error.badrequest', [], 'flashes');
             }
 
             return $this->returnError($msg, Codes::HTTP_BAD_REQUEST, $formErrors);
@@ -517,7 +517,7 @@ class CommonApiController extends FOSRestController implements MauticController
      *
      * @return array
      */
-    public function getFormErrorMessages(\Symfony\Component\Form\Form $form)
+    public function getFormErrorMessages(Form $form)
     {
         $errors = [];
 

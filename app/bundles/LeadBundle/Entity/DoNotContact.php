@@ -109,8 +109,7 @@ class DoNotContact
      */
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
-        $metadata->setGroupPrefix('lead')
-            ->setRoot('lead')
+        $metadata->addGroup('doNotContact')
             ->addListProperties(
                 [
                     'id',
@@ -123,12 +122,6 @@ class DoNotContact
             )
             ->addProperties(
                 [
-                    'id',
-                    'dateAdded',
-                    'reason',
-                    'comments',
-                    'channel',
-                    'channelId',
                     'lead',
                 ]
             )
