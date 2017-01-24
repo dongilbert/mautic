@@ -1293,8 +1293,19 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
      */
     public function removeFrequencyRule(FrequencyRule $frequencyRule)
     {
-        $this->isChanged('frequencyRule', $frequencyRule->getId());
+        $this->isChanged('frequencyRules', $frequencyRule->getId());
         $this->frequencyRules->removeElement($frequencyRule);
+    }
+
+    /**
+     * Add frequency rule.
+     *
+     * @param FrequencyRule $frequencyRule
+     */
+    public function addFrequencyRule(FrequencyRule $frequencyRule)
+    {
+        $this->isChanged('frequencyRules', $frequencyRule->getId());
+        $this->frequencyRules[] = $frequencyRule;
     }
 
     /**
@@ -1378,34 +1389,48 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
 
                     if (in_array($channel, $dncChannels)) {
                         // Channel in DNC so give lower preference
-                        return -1;
+                        return 1;
                     }
 
                     $aPausedFrom = $a->getPauseFromDate();
                     $aPausedTo = $a->getPauseToDate();
-                    $now = new \DateTime();
-                    if ($aPausedFrom >= $now && $now <= $aPausedTo) {
-                        // A is paused so give lower preference
-                        return -1;
+                    if ($aPausedFrom && $aPausedTo) {
+                        $now = new \DateTime();
+                        if ($now >= $aPausedFrom && $now <= $aPausedTo) {
+                            // A is paused so give lower preference
+                            return 1;
+                        }
                     }
 
                     $aPreferred = $a->getPreferredChannel();
                     $bPreferred = $a->getPreferredChannel();
                     if ($aPreferred === $bPreferred) {
+                        $aFrequencyTime = $a->getFrequencyTime();
+                        $bFrequencyTime = $b->getFrequencyTime();
+                        $aFrequencyNumber = $a->getFrequencyNumber();
+                        $bFrequencyNumber = $b->getFrequencyNumber();
+
+                        if (!$aFrequencyTime || !$bFrequencyTime || !$aFrequencyNumber || !$bFrequencyNumber) {
+                            return 0;
+                        }
+
                         // Order by which ever can be sent more frequent
-                        if ($a->getFrequencyTime() === $b->getFrequencyTime()) {
+                        if ($aFrequencyTime === $bFrequencyTime) {
                             if ($a->getFrequencyNumber() === $b->getFrequencyNumber()) {
                                 return 0;
                             }
 
-                            return ($a->getFrequencyNumber() < $b->getFrequencyNumber()) ? -1 : 1;
+                            return ($a->getFrequencyNumber() > $b->getFrequencyNumber()) ? -1 : 1;
                         } else {
-                            $convertTime = function ($number, $unit) {
+                            $convertToMonth = function ($number, $unit) {
                                 switch ($unit) {
-                                    case FrequencyRule::TIME_WEEK:
-                                        $number = $number * 7;
-                                        break;
                                     case FrequencyRule::TIME_MONTH:
+                                        $number = (int) $number;
+                                        break;
+                                    case FrequencyRule::TIME_WEEK:
+                                        $number = $number * 4;
+                                        break;
+                                    case FrequencyRule::TIME_DAY:
                                         $number = $number * 30;
                                         break;
                                 }
@@ -1413,18 +1438,18 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
                                 return $number;
                             };
 
-                            $aFrequency = $convertTime($a->getFrequencyNumber(), $a->getFrequencyTime());
-                            $bFrequency = $convertTime($b->getFrequencyNumber(), $b->getFrequencyTime());
+                            $aFrequency = $convertToMonth($a->getFrequencyNumber(), $a->getFrequencyTime());
+                            $bFrequency = $convertToMonth($b->getFrequencyNumber(), $b->getFrequencyTime());
 
                             if ($aFrequency === $bFrequency) {
                                 return 0;
                             }
 
-                            return ($aFrequency < $bFrequency) ? -1 : 1;
+                            return ($aFrequency > $bFrequency) ? -1 : 1;
                         }
                     }
 
-                    return ($aPreferred < $bPreferred) ? -1 : 1;
+                    return ($aPreferred > $bPreferred) ? -1 : 1;
                 }
             );
 
