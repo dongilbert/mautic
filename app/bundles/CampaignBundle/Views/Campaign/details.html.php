@@ -8,6 +8,7 @@
  *
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
+
 $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('mauticContent', 'campaign');
 $view['slots']->set('headerTitle', $campaign->getName());
@@ -32,7 +33,7 @@ $view['slots']->set(
     'publishStatus',
     $view->render('MauticCoreBundle:Helper:publishstatus_badge.html.php', ['entity' => $campaign])
 );
-
+$viewName   = 'MauticCampaignBundle:Campaign:details.html.php';
 $decisions  = trim($view->render('MauticCampaignBundle:Campaign:events.html.php', ['events' => $events['decision']]));
 $actions    = trim($view->render('MauticCampaignBundle:Campaign:events.html.php', ['events' => $events['action']]));
 $conditions = trim($view->render('MauticCampaignBundle:Campaign:events.html.php', ['events' => $events['condition']]));
@@ -106,6 +107,7 @@ switch (true) {
             </div>
             <!--/ campaign detail collapseable toggler -->
 
+            <?php echo $view['content']->getCustomContent($viewName, 'left.section.top', get_defined_vars()); ?>
             <!-- some stats -->
             <div class="pa-md">
                 <div class="row">
@@ -171,6 +173,7 @@ switch (true) {
                         <?php echo $view['translator']->trans('mautic.lead.leads'); ?>
                     </a>
                 </li>
+                <?php echo $view['content']->getCustomContent($viewName, 'tabs', get_defined_vars()); ?>
             </ul>
             <!--/ tabs controls -->
         </div>
@@ -204,17 +207,19 @@ switch (true) {
                 <?php echo $campaignLeads; ?>
                 <div class="clearfix"></div>
             </div>
+            <?php echo $view['content']->getCustomContent($viewName, 'tabs.content', get_defined_vars()); ?>
         </div>
         <!--/ end: tab-content -->
+
+        <?php echo $view['content']->getCustomContent($viewName, 'left.section.bottom', get_defined_vars()); ?>
     </div>
     <!--/ left section -->
 
     <!-- right section -->
     <div class="col-md-3 bg-white bdr-l height-auto">
-
-        <!-- recent activity -->
+        <?php echo $view['content']->getCustomContent($viewName, 'right.section.top', get_defined_vars()); ?>
         <?php echo $view->render('MauticCoreBundle:Helper:recentactivity.html.php', ['logs' => $logs]); ?>
-
+        <?php echo $view['content']->getCustomContent($viewName, 'right.section.bottom', get_defined_vars()); ?>
     </div>
     <!--/ right section -->
 </div>

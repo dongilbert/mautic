@@ -59,6 +59,8 @@ return [
                 'class'     => 'Mautic\ChannelBundle\EventListener\CampaignSubscriber',
                 'arguments' => [
                     'mautic.channel.model.message',
+                    'mautic.campaign.model.campaign',
+                    'mautic.campaign.model.event',
                 ],
             ],
 
