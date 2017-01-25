@@ -17,6 +17,7 @@ use Mautic\ApiBundle\Serializer\Driver\ApiMetadataDriver;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 use Mautic\CoreBundle\Entity\FormEntity;
 use Mautic\CoreBundle\Entity\IpAddress;
+use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\NotificationBundle\Entity\PushID;
 use Mautic\StageBundle\Entity\Stage;
 use Mautic\UserBundle\Entity\User;
@@ -39,6 +40,76 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
      * @var int
      */
     private $id;
+
+    /**
+     * @var
+     */
+    private $title;
+
+    /**
+     * @var
+     */
+    private $firstname;
+
+    /**
+     * @var
+     */
+    private $lastname;
+
+    /**
+     * @var
+     */
+    private $company;
+
+    /**
+     * @var
+     */
+    private $position;
+
+    /**
+     * @var
+     */
+    private $email;
+
+    /**
+     * @var
+     */
+    private $phone;
+
+    /**
+     * @var
+     */
+    private $mobile;
+
+    /**
+     * @var
+     */
+    private $address1;
+
+    /**
+     * @var
+     */
+    private $address2;
+
+    /**
+     * @var
+     */
+    private $city;
+
+    /**
+     * @var
+     */
+    private $state;
+
+    /**
+     * @var
+     */
+    private $zipcode;
+
+    /**
+     * @var
+     */
+    private $country;
 
     /**
      * @var \Mautic\UserBundle\Entity\User
@@ -140,6 +211,7 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
      * @var \Mautic\StageBundle\Entity\Stage
      */
     private $stage;
+
     /**
      * @var ArrayCollection
      */
@@ -321,6 +393,27 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
                 ->cascadeAll()
                 ->fetchExtraLazy()
                 ->build();
+
+        self::loadFixedFieldMetadata(
+            $builder,
+            [
+                'title',
+                'firstname',
+                'lastname',
+                'company',
+                'position',
+                'email',
+                'phone',
+                'mobile',
+                'address1',
+                'address2',
+                'city',
+                'state',
+                'zipcode',
+                'country',
+            ],
+            FieldModel::$coreFields
+        );
     }
 
     /**
@@ -330,8 +423,30 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
      */
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
-        $metadata->setGroupPrefix('lead')
-                 ->setRoot('lead')
+        $metadata->setRoot('lead')
+            ->setGroupPrefix('leadBasic')
+            ->addListProperties(
+                [
+                    'id',
+                    'points',
+                    'color',
+                    'title',
+                    'firstname',
+                    'lastname',
+                    'company',
+                    'position',
+                    'email',
+                    'phone',
+                    'mobile',
+                    'address1',
+                    'address2',
+                    'city',
+                    'state',
+                    'zipcode',
+                    'country',
+                ]
+            )
+            ->setGroupPrefix('lead')
                  ->addListProperties(
                      [
                          'id',
@@ -566,42 +681,6 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
         }
 
         return $fullName;
-    }
-
-    /**
-     * Get company.
-     *
-     * @return string
-     */
-    public function getCompany()
-    {
-        if (isset($this->updatedFields['company'])) {
-            return $this->updatedFields['company'];
-        }
-
-        if (!empty($this->fields['core']['company']['value'])) {
-            return $this->fields['core']['company']['value'];
-        }
-
-        return '';
-    }
-
-    /**
-     * Get email.
-     *
-     * @return string
-     */
-    public function getEmail()
-    {
-        if (isset($this->updatedFields['email'])) {
-            return $this->updatedFields['email'];
-        }
-
-        if (!empty($this->fields['core']['email']['value'])) {
-            return $this->fields['core']['email']['value'];
-        }
-
-        return '';
     }
 
     /**
@@ -1363,6 +1442,286 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
     public function setPrimaryCompany($primaryCompany)
     {
         $this->primaryCompany = $primaryCompany;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param mixed $title
+     *
+     * @return Lead
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+    /**
+     * @param mixed $firstname
+     *
+     * @return Lead
+     */
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+    /**
+     * @param mixed $lastname
+     *
+     * @return Lead
+     */
+    public function setLastname($lastname)
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param mixed $position
+     *
+     * @return Lead
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPhone()
+    {
+        return $this->phone;
+    }
+
+    /**
+     * @param mixed $phone
+     *
+     * @return Lead
+     */
+    public function setPhone($phone)
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMobile()
+    {
+        return $this->mobile;
+    }
+
+    /**
+     * @param mixed $mobile
+     *
+     * @return Lead
+     */
+    public function setMobile($mobile)
+    {
+        $this->mobile = $mobile;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAddress1()
+    {
+        return $this->address1;
+    }
+
+    /**
+     * @param mixed $address1
+     *
+     * @return Lead
+     */
+    public function setAddress1($address1)
+    {
+        $this->address1 = $address1;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAddress2()
+    {
+        return $this->address2;
+    }
+
+    /**
+     * @param mixed $address2
+     *
+     * @return Lead
+     */
+    public function setAddress2($address2)
+    {
+        $this->address2 = $address2;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    /**
+     * @param mixed $city
+     *
+     * @return Lead
+     */
+    public function setCity($city)
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param mixed $state
+     *
+     * @return Lead
+     */
+    public function setState($state)
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getZipcode()
+    {
+        return $this->zipcode;
+    }
+
+    /**
+     * @param mixed $zipcode
+     *
+     * @return Lead
+     */
+    public function setZipcode($zipcode)
+    {
+        $this->zipcode = $zipcode;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param mixed $country
+     *
+     * @return Lead
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCompany()
+    {
+        return $this->company;
+    }
+
+    /**
+     * @param mixed $company
+     *
+     * @return Lead
+     */
+    public function setCompany($company)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param mixed $email
+     *
+     * @return Lead
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
 
         return $this;
     }

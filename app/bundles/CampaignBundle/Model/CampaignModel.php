@@ -63,6 +63,11 @@ class CampaignModel extends CommonFormModel
     protected $formModel;
 
     /**
+     * @var
+     */
+    protected static $events;
+
+    /**
      * CampaignModel constructor.
      *
      * @param CoreParametersHelper $coreParametersHelper
@@ -299,6 +304,7 @@ class CampaignModel extends CommonFormModel
                 ];
             }
         }
+
         // Assign parent/child relationships
         foreach ($events as $id => $e) {
             if (isset($relationships[$id])) {
@@ -489,7 +495,9 @@ class CampaignModel extends CommonFormModel
      */
     public function getEvents($type = null)
     {
-        static $events;
+        if (!isset(self::$events)) {
+            self::$events = [];
+        }
 
         if (empty($events)) {
             //build them
@@ -536,17 +544,19 @@ class CampaignModel extends CommonFormModel
 
             $events['connectionResrictions'] = $associationRestrictions;
             $events['anchorRestrictions']    = $anchorRestrictions;
+
+            self::$events = $events;
         }
 
         if (null !== $type) {
-            if (!isset($events[$type])) {
+            if (!isset(self::$events[$type])) {
                 throw new \InvalidArgumentException("$type not found as array key");
             }
 
-            return $events[$type];
+            return self::$events[$type];
         }
 
-        return $events;
+        return self::$events;
     }
 
     /**
@@ -1237,11 +1247,5 @@ class CampaignModel extends CommonFormModel
         }
 
         return $chart->render();
-    }
-
-    public function setEventsCampaignType($campaignType)
-    {
-        $event = new Events\CampaignBuilderEvent($this->translator);
-        $event->setCampaignType($campaignType);
     }
 }
