@@ -21,21 +21,6 @@ use Symfony\Component\Form\Form;
 class MessageController extends AbstractStandardFormController
 {
     /**
-     * @param        $objectAction
-     * @param int    $objectId
-     * @param string $objectModel
-     *
-     * @return JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function executeAction($objectAction, $objectId = 0, $objectSubId = 0, $objectModel = '')
-    {
-        if (method_exists($this, "{$objectAction}Action")) {
-            return $this->{"{$objectAction}Action"}($objectId);
-        } else {
-            return $this->accessDenied();
-        }
-    }
-    /**
      * @param $args
      * @param $view
      *
@@ -64,18 +49,18 @@ class MessageController extends AbstractStandardFormController
             case 'view':
                 $viewParameters = [
                     'channels'         => $model->getChannels(),
-                    'channel_contents' => $model->getChannelMessages($args['viewParameters']['item']->getId()),
+                    'channel_contents' => $model->getMessageChannels($args['viewParameters']['item']->getId()),
                 ];
 
                 break;
             case 'new':
             case 'edit':
-            // Check to see if this is a popup
-            if (isset($form['updateSelect'])) {
-                $this->template = false;
-            } else {
-                $this->template = true;
-            }
+                // Check to see if this is a popup
+                if (isset($form['updateSelect'])) {
+                    $this->template = false;
+                } else {
+                    $this->template = true;
+                }
                 $viewParameters = [
                     'channels' => $model->getChannels(),
                 ];
@@ -91,6 +76,8 @@ class MessageController extends AbstractStandardFormController
     /**
      * @param Form $form
      * @param      $view
+     *
+     * @return \Symfony\Component\Form\FormView
      */
     public function getStandardFormView(Form $form, $view)
     {
@@ -135,16 +122,17 @@ class MessageController extends AbstractStandardFormController
     {
         return $this->editStandard($objectId, $ignorePost);
     }
+
     /**
-     * @param      $objectId
-     * @param bool $ignorePost
+     * @param $objectId
      *
-     * @return \Mautic\CoreBundle\Controller\Response|\Symfony\Component\HttpFoundation\JsonResponse
+     * @return array|\Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function viewAction($objectId)
     {
         return $this->viewStandard($objectId);
     }
+
     /**
      * @param $objectId
      *

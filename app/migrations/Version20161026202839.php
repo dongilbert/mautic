@@ -81,53 +81,11 @@ CREATE TABLE {$this->prefix}messages (
 SQL;
         $this->addSql($sql);
 
-        $contactIdx = $this->generatePropertyName('message_stats', 'idx', ['contact_id']);
-        $messageIdx = $this->generatePropertyName('message_stats', 'idx', ['message_id']);
-        $sql        = <<<SQL
-CREATE TABLE {$this->prefix}message_stats (
-    id INT AUTO_INCREMENT NOT NULL, 
-    contact_id INT NOT NULL, 
-    message_id INT NOT NULL, 
-    date_sent DATETIME NOT NULL COMMENT '(DC2Type:datetime)', 
-    channel_stat_id INT NOT NULL, 
-    INDEX $contactIdx (contact_id), 
-    INDEX $messageIdx (message_id), 
-    INDEX {$this->prefix}message_sent_index (date_sent), 
-    INDEX {$this->prefix}message_channel_stat_index (channel_stat_id), 
-    PRIMARY KEY(id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
-SQL;
-        $this->addSql($sql);
-
-        $sql = <<<SQL
-CREATE TABLE {$this->prefix}message_goals (
-  id INT AUTO_INCREMENT NOT NULL,
-  channel_id INT NOT NULL, 
-  name VARCHAR(255) NOT NULL, 
-  properties LONGTEXT NOT NULL COMMENT '(DC2Type:json_array)',
-  goal_type VARCHAR(255) NOT NULL, 
-  goal_order INT NOT NULL,
-  INDEX IDX_E1D01FA472F5A1AA (channel_id), 
-  INDEX {$this->prefix}campaign_decisions (goal_type), 
-  PRIMARY KEY(id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
-SQL;
-        $this->addSql($sql);
-
         // Foreign key constraints
         $messageFk = $this->generatePropertyName('message_channels', 'fk', ['message_id']);
         $this->addSql("ALTER TABLE {$this->prefix}message_channels ADD CONSTRAINT $messageFk FOREIGN KEY (message_id) REFERENCES {$this->prefix}messages (id) ON DELETE CASCADE");
 
         $categoryFk = $this->generatePropertyName('messages', 'fk', ['category_id']);
         $this->addSql("ALTER TABLE {$this->prefix}messages ADD CONSTRAINT $categoryFk FOREIGN KEY (category_id) REFERENCES {$this->prefix}categories (id) ON DELETE SET NULL");
-
-        $contactFk = $this->generatePropertyName('message_stats', 'fk', ['contact_id']);
-        $this->addSql("ALTER TABLE {$this->prefix}message_stats ADD CONSTRAINT $contactFk FOREIGN KEY (contact_id) REFERENCES {$this->prefix}leads (id) ON DELETE CASCADE");
-
-        $messageFk = $this->generatePropertyName('message_stats', 'fk', ['message_id']);
-        $this->addSql("ALTER TABLE {$this->prefix}message_stats ADD CONSTRAINT $messageFk FOREIGN KEY (message_id) REFERENCES {$this->prefix}messages (id) ON DELETE CASCADE");
-
-        $channelFk = $this->generatePropertyName('message_channels', 'fk', ['channel_id']);
-        $this->addSql("ALTER TABLE {$this->prefix}message_goals ADD CONSTRAINT $channelFk FOREIGN KEY (channel_id) REFERENCES {$this->prefix}message_channels (id) ON DELETE CASCADE");
     }
 }

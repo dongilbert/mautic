@@ -165,7 +165,7 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
      *
      * @var array
      */
-    private $preferredChannels = [];
+    private $channelRules = [];
 
     /**
      * Constructor.
@@ -190,137 +190,137 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
         $builder = new ClassMetadataBuilder($metadata);
 
         $builder->setTable('leads')
-            ->setCustomRepositoryClass('Mautic\LeadBundle\Entity\LeadRepository')
-            ->addLifecycleEvent('checkDateIdentified', 'preUpdate')
-            ->addLifecycleEvent('checkDateIdentified', 'prePersist')
-            ->addLifecycleEvent('checkAttributionDate', 'preUpdate')
-            ->addLifecycleEvent('checkAttributionDate', 'prePersist')
-            ->addIndex(['date_added'], 'lead_date_added');
+                ->setCustomRepositoryClass('Mautic\LeadBundle\Entity\LeadRepository')
+                ->addLifecycleEvent('checkDateIdentified', 'preUpdate')
+                ->addLifecycleEvent('checkDateIdentified', 'prePersist')
+                ->addLifecycleEvent('checkAttributionDate', 'preUpdate')
+                ->addLifecycleEvent('checkAttributionDate', 'prePersist')
+                ->addIndex(['date_added'], 'lead_date_added');
 
         $builder->createField('id', 'integer')
-            ->isPrimaryKey()
-            ->generatedValue()
-            ->build();
+                ->isPrimaryKey()
+                ->generatedValue()
+                ->build();
 
         $builder->createManyToOne('owner', 'Mautic\UserBundle\Entity\User')
-            ->addJoinColumn('owner_id', 'id', true, false, 'SET NULL')
-            ->build();
+                ->addJoinColumn('owner_id', 'id', true, false, 'SET NULL')
+                ->build();
 
         $builder->createField('points', 'integer')
-            ->build();
+                ->build();
 
         $builder->createOneToMany('pointsChangeLog', 'PointsChangeLog')
-            ->orphanRemoval()
-            ->setOrderBy(['dateAdded' => 'DESC'])
-            ->mappedBy('lead')
-            ->cascadeAll()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->setOrderBy(['dateAdded' => 'DESC'])
+                ->mappedBy('lead')
+                ->cascadeAll()
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createOneToMany('companyChangeLog', 'CompanyChangeLog')
-            ->orphanRemoval()
-            ->setOrderBy(['dateAdded' => 'DESC'])
-            ->mappedBy('lead')
-            ->cascadeAll()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->setOrderBy(['dateAdded' => 'DESC'])
+                ->mappedBy('lead')
+                ->cascadeAll()
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createOneToMany('doNotContact', 'Mautic\LeadBundle\Entity\DoNotContact')
-            ->orphanRemoval()
-            ->mappedBy('lead')
-            ->cascadePersist()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->mappedBy('lead')
+                ->cascadePersist()
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createManyToMany('ipAddresses', 'Mautic\CoreBundle\Entity\IpAddress')
-            ->setJoinTable('lead_ips_xref')
-            ->addInverseJoinColumn('ip_id', 'id', false)
-            ->addJoinColumn('lead_id', 'id', false, false, 'CASCADE')
-            ->setIndexBy('ipAddress')
-            ->cascadeMerge()
-            ->cascadePersist()
-            ->cascadeDetach()
-            ->build();
+                ->setJoinTable('lead_ips_xref')
+                ->addInverseJoinColumn('ip_id', 'id', false)
+                ->addJoinColumn('lead_id', 'id', false, false, 'CASCADE')
+                ->setIndexBy('ipAddress')
+                ->cascadeMerge()
+                ->cascadePersist()
+                ->cascadeDetach()
+                ->build();
 
         $builder->createOneToMany('pushIds', 'Mautic\NotificationBundle\Entity\PushID')
-            ->orphanRemoval()
-            ->mappedBy('lead')
-            ->cascadeAll()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->mappedBy('lead')
+                ->cascadeAll()
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createField('lastActive', 'datetime')
-            ->columnName('last_active')
-            ->nullable()
-            ->build();
+                ->columnName('last_active')
+                ->nullable()
+                ->build();
 
         $builder->createField('internal', 'array')
-            ->nullable()
-            ->build();
+                ->nullable()
+                ->build();
 
         $builder->createField('socialCache', 'array')
-            ->columnName('social_cache')
-            ->nullable()
-            ->build();
+                ->columnName('social_cache')
+                ->nullable()
+                ->build();
 
         $builder->createField('dateIdentified', 'datetime')
-            ->columnName('date_identified')
-            ->nullable()
-            ->build();
+                ->columnName('date_identified')
+                ->nullable()
+                ->build();
 
         $builder->createOneToMany('notes', 'LeadNote')
-            ->orphanRemoval()
-            ->setOrderBy(['dateAdded' => 'DESC'])
-            ->mappedBy('lead')
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->setOrderBy(['dateAdded' => 'DESC'])
+                ->mappedBy('lead')
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createField('preferredProfileImage', 'string')
-            ->columnName('preferred_profile_image')
-            ->nullable()
-            ->build();
+                ->columnName('preferred_profile_image')
+                ->nullable()
+                ->build();
 
         $builder->createManyToMany('tags', 'Mautic\LeadBundle\Entity\Tag')
-            ->setJoinTable('lead_tags_xref')
-            ->addInverseJoinColumn('tag_id', 'id', false)
-            ->addJoinColumn('lead_id', 'id', false, false, 'CASCADE')
-            ->setOrderBy(['tag' => 'ASC'])
-            ->setIndexBy('tag')
-            ->fetchLazy()
-            ->cascadeMerge()
-            ->cascadePersist()
-            ->cascadeDetach()
-            ->build();
+                ->setJoinTable('lead_tags_xref')
+                ->addInverseJoinColumn('tag_id', 'id', false)
+                ->addJoinColumn('lead_id', 'id', false, false, 'CASCADE')
+                ->setOrderBy(['tag' => 'ASC'])
+                ->setIndexBy('tag')
+                ->fetchLazy()
+                ->cascadeMerge()
+                ->cascadePersist()
+                ->cascadeDetach()
+                ->build();
 
         $builder->createManyToOne('stage', 'Mautic\StageBundle\Entity\Stage')
-            ->cascadePersist()
-            ->cascadeMerge()
-            ->addJoinColumn('stage_id', 'id', true, false, 'SET NULL')
-            ->build();
+                ->cascadePersist()
+                ->cascadeMerge()
+                ->addJoinColumn('stage_id', 'id', true, false, 'SET NULL')
+                ->build();
 
         $builder->createOneToMany('stageChangeLog', 'StagesChangeLog')
-            ->orphanRemoval()
-            ->setOrderBy(['dateAdded' => 'DESC'])
-            ->mappedBy('lead')
-            ->cascadeAll()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->setOrderBy(['dateAdded' => 'DESC'])
+                ->mappedBy('lead')
+                ->cascadeAll()
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createOneToMany('utmtags', 'Mautic\LeadBundle\Entity\UtmTag')
-            ->orphanRemoval()
-            ->mappedBy('lead')
-            ->cascadeAll()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->mappedBy('lead')
+                ->cascadeAll()
+                ->fetchExtraLazy()
+                ->build();
 
         $builder->createOneToMany('frequencyRules', 'Mautic\LeadBundle\Entity\FrequencyRule')
-            ->orphanRemoval()
-            ->setIndexBy('channel')
-            ->setOrderBy(['dateAdded' => 'DESC'])
-            ->mappedBy('lead')
-            ->cascadeAll()
-            ->fetchExtraLazy()
-            ->build();
+                ->orphanRemoval()
+                ->setIndexBy('channel')
+                ->setOrderBy(['dateAdded' => 'DESC'])
+                ->mappedBy('lead')
+                ->cascadeAll()
+                ->fetchExtraLazy()
+                ->build();
     }
 
     /**
@@ -331,30 +331,30 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
         $metadata->setGroupPrefix('lead')
-            ->setRoot('lead')
-            ->addListProperties(
-                [
-                    'id',
-                    'points',
-                    'color',
-                    'fields',
-                ]
-            )
-            ->addProperties(
-                [
-                    'lastActive',
-                    'owner',
-                    'ipAddresses',
-                    'tags',
-                    'utmtags',
-                    'stage',
-                    'dateIdentified',
-                    'preferredProfileImage',
-                    'doNotContact',
-                    'frequencyRules',
-                ]
-            )
-            ->build();
+                 ->setRoot('lead')
+                 ->addListProperties(
+                     [
+                         'id',
+                         'points',
+                         'color',
+                         'fields',
+                     ]
+                 )
+                 ->addProperties(
+                     [
+                         'lastActive',
+                         'owner',
+                         'ipAddresses',
+                         'tags',
+                         'utmtags',
+                         'stage',
+                         'dateIdentified',
+                         'preferredProfileImage',
+                         'doNotContact',
+                         'frequencyRules',
+                     ]
+                 )
+                 ->build();
     }
 
     /**
@@ -1368,96 +1368,147 @@ class Lead extends FormEntity implements CustomFieldEntityInterface
     }
 
     /**
+     * Returns array of rules with preferred channels first.
+     *
      * @return mixed
      */
-    public function getPreferredChannels()
+    public function getChannelRules()
     {
-        if (empty($this->preferredChannels)) {
-            $rules       = $this->getFrequencyRules()->toArray();
-            $dnc         = $this->getDoNotContact();
-            $dncChannels = [];
+        if (null === $this->channelRules) {
+            $frequencyRules = $this->getFrequencyRules()->toArray();
+            $dnc            = $this->getDoNotContact();
+            $dncChannels    = [];
             /** @var DoNotContact $record */
             foreach ($dnc as $record) {
-                $dncChannels[] = $record->getChannel();
+                $dncChannels[$record->getChannel()] = $record->getReason();
             }
 
-            /* @var FrequencyRule $rule */
-            usort(
-                $rules,
-                function (FrequencyRule $a, FrequencyRule $b) use ($dncChannels) {
-                    $channel = $a->getChannel();
+            $this->channelRules = self::generateChannelRules($frequencyRules, $dncChannels);
+        }
 
-                    if (in_array($channel, $dncChannels)) {
-                        // Channel in DNC so give lower preference
+        return $this->channelRules;
+    }
+
+    /**
+     * @param array $rules
+     *
+     * @return $this
+     */
+    public function setChannelRules(array $rules)
+    {
+        $this->channelRules = $rules;
+
+        return $this;
+    }
+
+    /**
+     * Used mostly when batching to generate preferred channels without hydrating associations one at a time.
+     *
+     * @param array $frequencyRules
+     * @param array $dncRules
+     */
+    public static function generateChannelRules(array $frequencyRules, array $dncRules)
+    {
+        $rules = [];
+        foreach ($frequencyRules as $rule) {
+            if ($rule instanceof FrequencyRule) {
+                $rules[$rule->getChannel] = [
+                    'channel'           => $rule->getChannel(),
+                    'pause_from_date'   => $rule->getPauseFromDate(),
+                    'pause_to_date'     => $rule->getPauseToDate(),
+                    'preferred_channel' => $rule->getPreferredChannel(),
+                    'frequency_time'    => $rule->getFrequencyTime(),
+                    'frequency_number'  => $rule->getFrequencyNumber(),
+                ];
+            } else {
+                // Already an array
+                break;
+            }
+        }
+        if (count($rules)) {
+            $frequencyRules = $rules;
+        }
+
+        /* @var FrequencyRule $rule */
+        usort(
+            $frequencyRules,
+            function ($a, $b) use ($dncRules) {
+                if (in_array($a['channel'], $dncRules)) {
+                    // Channel in DNC so give lower preference
+                    return 1;
+                }
+
+                if ($a['pause_from_date'] && $a['pause_to_date']) {
+                    $now = new \DateTime();
+                    if ($now >= $a['pause_from_date'] && $now <= $a['pause_to_date']) {
+                        // A is paused so give lower preference
                         return 1;
                     }
+                }
 
-                    $aPausedFrom = $a->getPauseFromDate();
-                    $aPausedTo = $a->getPauseToDate();
-                    if ($aPausedFrom && $aPausedTo) {
-                        $now = new \DateTime();
-                        if ($now >= $aPausedFrom && $now <= $aPausedTo) {
-                            // A is paused so give lower preference
-                            return 1;
-                        }
+                if ($a['preferred_channel'] === $b['preferred_channel']) {
+                    if (!$a['frequency_time'] || !$b['frequency_time'] || !$a['frequency_number'] || !$b['frequency_number']) {
+                        return 0;
                     }
 
-                    $aPreferred = $a->getPreferredChannel();
-                    $bPreferred = $a->getPreferredChannel();
-                    if ($aPreferred === $bPreferred) {
-                        $aFrequencyTime = $a->getFrequencyTime();
-                        $bFrequencyTime = $b->getFrequencyTime();
-                        $aFrequencyNumber = $a->getFrequencyNumber();
-                        $bFrequencyNumber = $b->getFrequencyNumber();
-
-                        if (!$aFrequencyTime || !$bFrequencyTime || !$aFrequencyNumber || !$bFrequencyNumber) {
+                    // Order by which ever can be sent more frequent
+                    if ($a['frequency_time'] === $b['frequency_time']) {
+                        if ($a['frequency_number'] === $b['frequency_number']) {
                             return 0;
                         }
 
-                        // Order by which ever can be sent more frequent
-                        if ($aFrequencyTime === $bFrequencyTime) {
-                            if ($a->getFrequencyNumber() === $b->getFrequencyNumber()) {
-                                return 0;
+                        return ($a['frequency_number'] > $b['frequency_number']) ? -1 : 1;
+                    } else {
+                        $convertToMonth = function ($number, $unit) {
+                            switch ($unit) {
+                                case FrequencyRule::TIME_MONTH:
+                                    $number = (int) $number;
+                                    break;
+                                case FrequencyRule::TIME_WEEK:
+                                    $number = $number * 4;
+                                    break;
+                                case FrequencyRule::TIME_DAY:
+                                    $number = $number * 30;
+                                    break;
                             }
 
-                            return ($a->getFrequencyNumber() > $b->getFrequencyNumber()) ? -1 : 1;
-                        } else {
-                            $convertToMonth = function ($number, $unit) {
-                                switch ($unit) {
-                                    case FrequencyRule::TIME_MONTH:
-                                        $number = (int) $number;
-                                        break;
-                                    case FrequencyRule::TIME_WEEK:
-                                        $number = $number * 4;
-                                        break;
-                                    case FrequencyRule::TIME_DAY:
-                                        $number = $number * 30;
-                                        break;
-                                }
+                            return $number;
+                        };
 
-                                return $number;
-                            };
+                        $aFrequency = $convertToMonth($a['frequency_number'], $a['frequency_time']);
+                        $bFrequency = $convertToMonth($b['frequency_number'], $b['frequency_time']);
 
-                            $aFrequency = $convertToMonth($a->getFrequencyNumber(), $a->getFrequencyTime());
-                            $bFrequency = $convertToMonth($b->getFrequencyNumber(), $b->getFrequencyTime());
-
-                            if ($aFrequency === $bFrequency) {
-                                return 0;
-                            }
-
-                            return ($aFrequency > $bFrequency) ? -1 : 1;
+                        if ($aFrequency === $bFrequency) {
+                            return 0;
                         }
+
+                        return ($aFrequency > $bFrequency) ? -1 : 1;
                     }
-
-                    return ($aPreferred > $bPreferred) ? -1 : 1;
                 }
-            );
 
-            foreach ($rules as $rule) {
-                $this->preferredChannels[$rule->getChannel()] = $rule;
+                return ($a['preferred_channel'] > $b['preferred_channel']) ? -1 : 1;
+            }
+        );
+
+        $rules = [];
+        foreach ($frequencyRules as $rule) {
+            $rules[$rule['channel']] =
+                [
+                    'frequency' => $rule,
+                    'dnc'       => array_key_exists($rule['channel'], $dncRules) ? $dncRules[$rule['channel']] : DoNotContact::IS_CONTACTABLE,
+                ];
+            unset($dncRules[$rule['channel']]);
+        }
+
+        if (count($dncRules)) {
+            foreach ($dncRules as $channel => $reason) {
+                $rules[$channel] = [
+                    'frequency' => null,
+                    'dnc'       => $reason,
+                ];
             }
         }
 
-        return $this->preferredChannels;
+        return $rules;
     }
 }

@@ -363,7 +363,7 @@ class CampaignModel extends CommonFormModel
     public function setChannelFromEventProperties($entity, $properties, &$eventSettings)
     {
         $channelSet = false;
-        if (!empty($eventSettings[$properties['type']]['channel'])) {
+        if (!$entity->getChannel() && !empty($eventSettings[$properties['type']]['channel'])) {
             $entity->setChannel($eventSettings[$properties['type']]['channel']);
             if (isset($eventSettings[$properties['type']]['channelIdField'])) {
                 $channelIdField = $eventSettings[$properties['type']]['channelIdField'];

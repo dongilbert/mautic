@@ -536,6 +536,7 @@ class EventModel extends CommonFormModel
                     'orderBy'            => 'l.id',
                     'orderByDir'         => 'asc',
                     'withPrimaryCompany' => true,
+                    'withChannelRules'   => true,
                 ]
             );
 
@@ -864,9 +865,7 @@ class EventModel extends CommonFormModel
 
             if ($response instanceof LeadEventLog) {
                 // Listener handled the event and returned a log entry
-                if (!$response->getChannel()) {
-                    $this->campaignModel->setChannelFromEventProperties($response, $event['properties'], $thisEventSettings);
-                }
+                $this->campaignModel->setChannelFromEventProperties($response, $event, $thisEventSettings);
 
                 $repo->saveEntity($response);
                 $this->em->detach($response);
@@ -901,7 +900,7 @@ class EventModel extends CommonFormModel
                 $this->logger->debug($debug);
             } else {
                 ++$executedEventCount;
-                $updateLog = false;
+
                 if ($response !== true) {
                     if ($this->triggeredResponses !== false) {
                         $eventTypeKey = $event['eventType'];
@@ -919,16 +918,10 @@ class EventModel extends CommonFormModel
                     }
 
                     $log->setMetadata($response);
-                    $updateLog = true;
                 }
 
-                if ($this->campaignModel->setChannelFromEventProperties($response, $event['properties'], $thisEventSettings)) {
-                    $updateLog = true;
-                }
-
-                if ($updateLog) {
-                    $repo->saveEntity($log);
-                }
+                $this->campaignModel->setChannelFromEventProperties($log, $event, $thisEventSettings);
+                $repo->saveEntity($log);
 
                 $this->logger->debug(
                     'CAMPAIGN: '.ucfirst($event['eventType']).' ID# '.$event['id'].' for contact ID# '.$lead->getId()
@@ -1128,6 +1121,7 @@ class EventModel extends CommonFormModel
                     'orderBy'            => 'l.id',
                     'orderByDir'         => 'asc',
                     'withPrimaryCompany' => true,
+                    'withChannelRules'   => true,
                 ]
             );
 
@@ -1415,6 +1409,7 @@ class EventModel extends CommonFormModel
                             'orderBy'            => 'l.id',
                             'orderByDir'         => 'asc',
                             'withPrimaryCompany' => true,
+                            'withChannelRules'   => true,
                         ]
                     );
 
@@ -1653,6 +1648,11 @@ class EventModel extends CommonFormModel
                 if ($campaignEvent->wasLogUpdatedByListener()) {
                     $campaignEvent->setResult($campaignEvent->getLogEntry());
                 }
+            }
+
+            if (null !== $log) {
+                $log->setChannel($campaignEvent->getChannel())
+                    ->setChannelId($campaignEvent->getChannelId());
             }
 
             return $campaignEvent->getResult();

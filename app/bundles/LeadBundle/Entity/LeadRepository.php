@@ -373,21 +373,42 @@ class LeadRepository extends CommonRepository implements CustomFieldRepositoryIn
      */
     public function getEntities($args = [])
     {
-        $contacts = $this->getEntitiesWithCustomFields('lead', $args, function ($r) {
-            if (!empty($this->triggerModel)) {
-                $r->setColor($this->triggerModel->getColorForLeadPoints($r->getPoints()));
+        $contacts = $this->getEntitiesWithCustomFields(
+            'lead',
+            $args,
+            function ($r) {
+                if (!empty($this->triggerModel)) {
+                    $r->setColor($this->triggerModel->getColorForLeadPoints($r->getPoints()));
+                }
+                $r->setAvailableSocialFields($this->availableSocialFields);
             }
-            $r->setAvailableSocialFields($this->availableSocialFields);
-        });
+        );
 
-        if (!empty($args['withPrimaryCompany'])) {
+        if (!empty($args['withPrimaryCompany']) || !empty($args['withChannelRules'])) {
+            $withCompanies   = !empty($args['withPrimaryCompany']);
+            $withPreferences = !empty($args['withChannelRules']);
+
             $withTotalCount = array_key_exists('withTotalCount', $args);
-            $tmpContacts    = ($withTotalCount && $args['withTotalCount']) ? $contacts['results'] : $contacts;
-            $contactIds     = array_keys($tmpContacts);
-            $companies      = $this->getEntityManager()->getRepository('MauticLeadBundle:Company')->getCompaniesForContacts($contactIds);
+            /** @var Lead[] $tmpContacts */
+            $tmpContacts = ($withTotalCount && $args['withTotalCount']) ? $contacts['results'] : $contacts;
+            $contactIds  = array_keys($tmpContacts);
+
+            if ($withCompanies) {
+                $companies = $this->getEntityManager()->getRepository('MauticLeadBundle:Company')->getCompaniesForContacts($contactIds);
+            }
+
+            if ($withPreferences) {
+                /** @var FrequencyRuleRepository $frequencyRepo */
+                $frequencyRepo  = $this->getEntityManager()->getRepository('MauticLeadBundle:FrequencyRule');
+                $frequencyRules = $frequencyRepo->getFrequencyRules(null, $contactIds);
+
+                /** @var DoNotContactRepository $dncRepository */
+                $dncRepository = $this->getEntityManager()->getRepository('MauticLeadBundle:DoNotContact');
+                $dncRules      = $dncRepository->getChannelList(null, $contactIds);
+            }
 
             foreach ($contactIds as $id) {
-                if (isset($companies[$id]) && !empty($companies[$id])) {
+                if ($withCompanies && isset($companies[$id]) && !empty($companies[$id])) {
                     $primary = null;
 
                     // Try to find the primary company
@@ -406,6 +427,18 @@ class LeadRepository extends CommonRepository implements CustomFieldRepositoryIn
                         $tmpContacts[$id]['primaryCompany'] = $primary;
                     } elseif ($tmpContacts[$id] instanceof Lead) {
                         $tmpContacts[$id]->setPrimaryCompany($primary);
+                    }
+                }
+
+                if ($withPreferences) {
+                    $contactFrequencyRules = (isset($frequencyRules[$id])) ? $frequencyRules[$id] : [];
+                    $contactDncRules       = (isset($dncRules[$id])) ? $dncRules[$id] : [];
+
+                    $channelRules = Lead::generateChannelRules($contactFrequencyRules, $contactDncRules);
+                    if (is_array($tmpContacts[$id])) {
+                        $tmpContacts[$id]['channelRules'] = $channelRules;
+                    } elseif ($tmpContacts[$id] instanceof Lead) {
+                        $tmpContacts[$id]->setChannelRules($channelRules);
                     }
                 }
             }

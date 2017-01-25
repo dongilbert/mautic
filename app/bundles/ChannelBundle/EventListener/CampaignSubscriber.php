@@ -14,26 +14,52 @@ namespace Mautic\ChannelBundle\EventListener;
 use Mautic\CampaignBundle\CampaignEvents;
 use Mautic\CampaignBundle\Event\CampaignBuilderEvent;
 use Mautic\CampaignBundle\Event\CampaignExecutionEvent;
+use Mautic\CampaignBundle\Model\CampaignModel;
+use Mautic\CampaignBundle\Model\EventModel;
 use Mautic\ChannelBundle\ChannelEvents;
 use Mautic\ChannelBundle\Model\MessageModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
+use Mautic\LeadBundle\Entity\DoNotContact;
 
 /**
  * Class CampaignSubscriber.
  */
 class CampaignSubscriber extends CommonSubscriber
 {
-    private $messageModel;
+    /**
+     * @var MessageModel
+     */
+    protected $messageModel;
+
+    /**
+     * @var CampaignModel
+     */
+    protected $campaignModel;
+
+    /**
+     * @var EventModel
+     */
+    protected $eventModel;
+
+    /**
+     * @var array
+     */
+    protected $messageChannels = [];
 
     /**
      * CampaignSubscriber constructor.
      *
-     * @param MessageModel $messageModel
+     * @param MessageModel  $messageModel
+     * @param CampaignModel $campaignModel
+     * @param EventModel    $eventModel
      */
-    public function __construct(MessageModel $messageModel)
+    public function __construct(MessageModel $messageModel, CampaignModel $campaignModel, EventModel $eventModel)
     {
-        $this->messageModel = $messageModel;
+        $this->messageModel  = $messageModel;
+        $this->campaignModel = $campaignModel;
+        $this->eventModel    = $eventModel;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -67,76 +93,105 @@ class CampaignSubscriber extends CommonSubscriber
      */
     public function onCampaignTriggerAction(CampaignExecutionEvent $event)
     {
-        $messageSent     = false;
-        $channelMessages = $this->messageModel->getChannelMessages((int) $event->getConfig()['marketingMessage']);
-        $messageEvent    = $event->getEvent();
-        $lead            = $event->getLead();
+        $messageSettings = $this->messageModel->getChannels();
+        $id              = (int) $event->getConfig()['marketingMessage'];
+        if (!isset($this->messageChannels[$id])) {
+            $this->messageChannels[$id] = $this->messageModel->getMessageChannels($id);
+        }
+        $lead           = $event->getLead();
+        $channelRules   = $lead->getChannelRules();
+        $result         = false;
+        $channelResults = [];
 
-        $args = [
-            'lead' => $lead,
+        // Use preferred channels first
+        $tryChannels = $this->messageChannels[$id];
+        foreach ($channelRules as $channel => $rule) {
+            if ($rule['dnc'] !== DoNotContact::IS_CONTACTABLE) {
+                unset($tryChannels[$channel]);
+                $channelResults[$channel] = [
+                    'failed' => 1,
+                    'dnc'    => $rule['dnc'],
+                ];
 
-            'eventDetails'    => '',
-            'systemTriggered' => $event->getSystemTriggered(),
-            'eventSettings'   => $event->getEventSettings(),
-        ];
-        $eventType = [
-            'campaign'            => $messageEvent['campaign'],
-            'name'                => $messageEvent['name'],
-            'id'                  => $messageEvent['id'],
-            'eventType'           => 'action',
-            'triggerDate'         => $messageEvent['triggerDate'],
-            'triggerInterval'     => $messageEvent['triggerInterval'],
-            'triggerIntervalUnit' => $messageEvent['triggerIntervalUnit'],
-            'triggerMode'         => $messageEvent['triggerMode'],
-            'decisionPath'        => $messageEvent['decisionPath'],
-
-        ];
-        $args['event'] = $eventType;
-        foreach ($channelMessages as $message) {
-            $messageId = $message['channel_id'];
-            switch ($message['channel']) {
-                case 'email':
-                    $eventName                   = \Mautic\EmailBundle\EmailEvents::ON_CAMPAIGN_TRIGGER_ACTION;
-                    $args['event']['type']       = 'email.send';
-                    $args['event']['properties'] = [
-                        'email'      => $messageId,
-                        'email_type' => 'marketing',
-                    ];
-                    break;
-                case 'sms':
-                    $eventName                   = \Mautic\SmsBundle\SmsEvents::ON_CAMPAIGN_TRIGGER_ACTION;
-                    $args['event']['type']       = 'sms.send_text_sms';
-                    $args['event']['properties'] = [
-                        'sms' => $messageId,
-                    ];
-                    break;
-                case 'dynamicContent':
-                    $eventName                   = \Mautic\DynamicContentBundle\DynamicContentEvents::ON_CAMPAIGN_TRIGGER_ACTION;
-                    $args['event']['type']       = 'dwc.push_content';
-                    $args['event']['properties'] = [
-                        'dynamicContent' => $messageId,
-                    ];
-                    break;
-                case 'notification':
-                    $eventName                   = \Mautic\NotificationBundle\NotificationEvents::ON_CAMPAIGN_TRIGGER_ACTION;
-                    $args['event']['type']       = 'notification.send_notification';
-                    $args['event']['properties'] = [
-                        'notification' => $messageId,
-                    ];
-                    break;
-                case 'tweet':
-                    $eventName             = \MauticPlugin\MauticSocialBundle\SocialEvents::ON_CAMPAIGN_TRIGGER_ACTION;
-                    $args['event']['type'] = 'twitter.tweet';
-                    break;
+                continue;
             }
-            $result       = [];
-            $channelEvent = new CampaignExecutionEvent($args, $result);
-            if ($this->dispatcher->hasListeners($eventName)) {
-                $channelEvent = $this->dispatcher->dispatch($eventName, $channelEvent);
-                $messageSent  = $channelEvent->getResult();
+
+            if (isset($tryChannels[$channel])) {
+                $messageChannel = $tryChannels[$channel];
+
+                // Remove this channel so that any non-preferred channels can be used as a last resort
+                unset($tryChannels[$channel]);
+
+                // Attempt to send the message
+                if (isset($messageSettings[$channel])) {
+                    $result = $this->sendChannelMessage($channel, $messageChannel, $messageSettings[$channel], $event, $channelResults);
+                }
             }
         }
 
-        return $event->setResult($messageSent);
+        if (!$result && count($tryChannels)) {
+            // All preferred channels were a no go so try whatever is left
+            foreach ($tryChannels as $channel => $messageChannel) {
+                // Attempt to send the message through other channels
+                if (isset($messageSettings[$channel])) {
+                    if ($this->sendChannelMessage($channel, $messageChannel, $messageSettings[$channel], $event, $channelResults)) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $event->setResult($channelResults);
+    }
+
+    /**
+     * @param                        $channel
+     * @param                        $messageChannel
+     * @param                        $settings
+     * @param CampaignExecutionEvent $event
+     * @param                        $channelResults
+     *
+     * @return bool|mixed
+     */
+    protected function sendChannelMessage($channel, $messageChannel, $settings, CampaignExecutionEvent $event, &$channelResults)
+    {
+        if (!isset($settings['campaignAction'])) {
+            return false;
+        }
+
+        $eventSettings  = $this->campaignModel->getEvents();
+        $campaignAction = $settings['campaignAction'];
+
+        $result = false;
+        if (isset($eventSettings['action'][$campaignAction])) {
+            $campaignEventSettings      = $eventSettings['action'][$campaignAction];
+            $messageEvent               = $event->getEvent();
+            $messageEvent['type']       = $campaignAction;
+            $messageEvent['properties'] = $messageChannel['properties'];
+
+            // Set the property set as the channel ID with the message ID
+            if (isset($campaignEventSettings['channelIdField'])) {
+                $messageEvent['properties'][$campaignEventSettings['channelIdField']] = $messageChannel['channel_id'];
+            }
+
+            $result = $this->eventModel->invokeEventCallback(
+                $messageEvent,
+                $campaignEventSettings,
+                $event->getLead(),
+                null,
+                $event->getSystemTriggered()
+            );
+
+            $channelResults[$channel] = $result;
+            if ($result) {
+                if (is_array($result) && !empty($result['failed'])) {
+                    $result = false;
+                } elseif (!$event->getChannel()) {
+                    $event->setChannel($channel, $messageChannel['channel_id']);
+                }
+            }
+        }
+
+        return $result;
     }
 }
