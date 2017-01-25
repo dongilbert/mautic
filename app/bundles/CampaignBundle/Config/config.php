@@ -116,6 +116,9 @@ return [
                     'doctrine.orm.entity_manager',
                 ],
             ],
+            'mautic.campaign.report.subscriber' => [
+                'class' => \Mautic\CampaignBundle\EventListener\ReportSubscriber::class,
+            ],
         ],
         'forms' => [
             'mautic.campaign.type.form' => [
