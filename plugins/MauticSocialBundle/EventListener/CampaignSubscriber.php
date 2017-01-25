@@ -74,11 +74,11 @@ class CampaignSubscriber extends CommonSubscriber
     {
         $event->setChannel('social.twitter');
         if ($response = $this->helper->sendTweetAction($event->getLead(), $event->getEvent())) {
-            $event->setResult($response);
-        } else {
-            $event->setFailed(
-                $this->translator->trans('mautic.social.twitter.error.handle_not_found')
-            );
+            return $event->setResult($response);
         }
+
+        return $event->setFailed(
+            $this->translator->trans('mautic.social.twitter.error.handle_not_found')
+        );
     }
 }

@@ -40,6 +40,7 @@ class ChannelSubscriber extends CommonSubscriber
             'tweet',
             [
                 MessageModel::CHANNEL_FEATURE => [
+                    'campaignAction'     => 'twitter.tweet',
                     'propertiesFormType' => 'twitter_tweet',
                     'channelTemplate'    => 'MauticSocialBundle:SubscribedEvents\Channel:message.html.php',
                     'formTheme'          => 'MauticSocialBundle:FormTheme',

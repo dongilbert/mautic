@@ -67,9 +67,8 @@ class CampaignEventHelper
     }
 
     /**
-     * @param MauticFactory $factory
-     * @param               $lead
-     * @param               $event
+     * @param   $lead
+     * @param   $event
      *
      * @return bool
      */
