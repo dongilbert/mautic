@@ -17,7 +17,19 @@ $getChannelOutput = function ($channel) use ($view, $event, $extra, $eventSettin
     $log['metadata'] = $log['metadata'][$channel];
 
     if (!empty($log['metadata']['dnc'])) {
-        return $view['translator']->trans('mautic.channel.dnc.'.$log['metadata']['dnc']);
+        switch ($log['metadata']['dnc']) {
+            case \Mautic\LeadBundle\Entity\DoNotContact::BOUNCED:
+                $msg = 'mautic.lead.event.donotcontact_bounce';
+                break;
+            case \Mautic\LeadBundle\Entity\DoNotContact::UNSUBSCRIBED:
+                $msg = 'mautic.lead.event.donotcontact_unsubscribed';
+                break;
+            case \Mautic\LeadBundle\Entity\DoNotContact::MANUAL:
+                $msg = 'mautic.lead.event.donotcontact_manual';
+                break;
+        }
+
+        return $view['translator']->trans($msg);
     }
 
     $template                     = 'MauticCampaignBundle:SubscribedEvents\Timeline:index.html.php';

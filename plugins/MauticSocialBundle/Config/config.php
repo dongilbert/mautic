@@ -131,7 +131,7 @@ return [
         'main' => [
             'mautic.social.monitoring' => [
                 'route'  => 'mautic_social_index',
-                'parent' => 'mautic.core.channels',
+                'parent' => 'mautic.core.components',
                 'access' => 'plugin:mauticSocial:monitoring:view',
             ],
         ],
