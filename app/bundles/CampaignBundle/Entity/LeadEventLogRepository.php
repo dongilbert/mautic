@@ -48,7 +48,9 @@ class LeadEventLogRepository extends CommonRepository
                     ll.metadata,
                     e.type,
                     ll.is_scheduled as isScheduled,
-                    ll.trigger_date as triggerDate
+                    ll.trigger_date as triggerDate,
+                    ll.channel,
+                    ll.channel_id as channel_id
                     '
             )
             ->from(MAUTIC_TABLE_PREFIX.'campaign_lead_event_log', 'll')

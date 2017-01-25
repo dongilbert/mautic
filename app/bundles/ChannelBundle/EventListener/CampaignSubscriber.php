@@ -77,13 +77,17 @@ class CampaignSubscriber extends CommonSubscriber
     public function onCampaignBuild(CampaignBuilderEvent $event)
     {
         $action = [
-            'label'          => 'mautic.channel.message.send.marketing.message',
-            'description'    => 'mautic.channel.message.send.marketing.message.descr',
-            'eventName'      => ChannelEvents::ON_CAMPAIGN_TRIGGER_ACTION,
-            'formType'       => 'message_send',
-            'formTheme'      => 'MauticChannelBundle:FormTheme\MessageSend',
-            'channel'        => 'channel.message',
-            'channelIdField' => 'marketingMessage',
+            'label'                => 'mautic.channel.message.send.marketing.message',
+            'description'          => 'mautic.channel.message.send.marketing.message.descr',
+            'eventName'            => ChannelEvents::ON_CAMPAIGN_TRIGGER_ACTION,
+            'formType'             => 'message_send',
+            'formTheme'            => 'MauticChannelBundle:FormTheme\MessageSend',
+            'channel'              => 'channel.message',
+            'channelIdField'       => 'marketingMessage',
+            'timelineTemplate'     => 'MauticChannelBundle:SubscribedEvents\Timeline:index.html.php',
+            'timelineTemplateVars' => [
+                'messageSettings' => $this->messageModel->getChannels(),
+            ],
         ];
         $event->addAction('message.send', $action);
     }
