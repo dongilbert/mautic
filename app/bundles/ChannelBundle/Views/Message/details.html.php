@@ -25,26 +25,32 @@ $view['slots']->set('actions', $view->render('MauticCoreBundle:Helper:page_actio
 $tabs   = [];
 $active = true;
 
-foreach ($channels as $channel => $config) {
-    $channelIdKey[$channel] = array_search($channel, array_column($channel_contents, 'channel'));
-    $tab                    = [
-        'active'        => $active,
-        'id'            => 'channel_'.$channel,
-        'name'          => $config['label'],
-        'content'       => ($channelIdKey[$channel] === 0 or $channelIdKey[$channel] > 0) ? $view['actions']->render(new \Symfony\Component\HttpKernel\Controller\ControllerReference($config['detailView'],
-            ['objectId' => $channel_contents[$channelIdKey[$channel]]['channel_id'], 'isEmbedded' => true])) : 'Not Active',
+foreach ($channelContents as $channel => $details) {
+    if (isset($channels[$channel])) {
+        $config = $channels[$channel];
+        $tab    = [
+            'active'        => $active,
+            'id'            => 'channel_'.$channel,
+            'containerAttr' => isset($config['mauticContent']) ? ['data-onload' => $config['mauticContent']] : [],
+            'name'          => $config['label'],
+            'content'       => $view['actions']->render(
+                new \Symfony\Component\HttpKernel\Controller\ControllerReference(
+                    $config['detailView'],
+                    ['objectId'   => $details['channel_id'], 'isEmbedded' => true],
+                    ['ignoreAjax' => true]
+                )
+            ),
+        ];
 
-    ];
-
-    $tabs[] = $tab;
-
-    $active = false;
+        $tabs[] = $tab;
+        $active = false;
+    }
 }
 
 $view['slots']->set('formTabs', $tabs);
 ?>
 <?php echo $view->render('MauticCoreBundle:Helper:tabs.html.php', ['tabs' => $tabs]);
-$view['slots']->set('mauticContent', 'message');
+$view['slots']->set('mauticContent', 'messages');
 ?>
 <?php
 $view['slots']->start('rightFormContent');

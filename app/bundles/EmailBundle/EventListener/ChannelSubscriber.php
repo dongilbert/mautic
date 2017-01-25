@@ -44,6 +44,7 @@ class ChannelSubscriber extends CommonSubscriber
                     'campaignAction' => 'email.send',
                     'lookupFormType' => 'email_list',
                     'detailView'     => 'MauticEmailBundle:Email:view',
+                    'mauticContent'  => 'email',
                 ],
                 LeadModel::CHANNEL_FEATURE => [],
             ]

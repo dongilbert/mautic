@@ -42,6 +42,7 @@ class ChannelSubscriber extends CommonSubscriber
                         'campaignAction' => 'sms.send_text_sms',
                         'lookupFormType' => 'sms_list',
                         'detailView'     => 'MauticSmsBundle:Sms:view',
+                        'mauticContent'  => 'sms',
                     ],
                     LeadModel::CHANNEL_FEATURE => [],
                 ]

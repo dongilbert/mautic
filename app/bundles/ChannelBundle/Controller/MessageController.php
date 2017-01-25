@@ -48,8 +48,8 @@ class MessageController extends AbstractStandardFormController
                 break;
             case 'view':
                 $viewParameters = [
-                    'channels'         => $model->getChannels(),
-                    'channel_contents' => $model->getMessageChannels($args['viewParameters']['item']->getId()),
+                    'channels'        => $model->getChannels(),
+                    'channelContents' => $model->getMessageChannels($args['viewParameters']['item']->getId()),
                 ];
 
                 break;

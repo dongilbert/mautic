@@ -43,6 +43,7 @@ class ChannelSubscriber extends CommonSubscriber
                     'campaignAction' => 'notification.send_notification',
                     'lookupFormType' => 'notification_list',
                     'detailView'     => 'MauticNotificationBundle:Notification:view',
+                    'mauticContent'  => 'notification',
                 ],
             ]
         );
