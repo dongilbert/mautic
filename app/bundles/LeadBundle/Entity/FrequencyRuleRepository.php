@@ -21,7 +21,6 @@ class FrequencyRuleRepository extends CommonRepository
     /**
      * @param $channel
      * @param $leadIds
-     * @param $listId
      * @param $defaultFrequencyNumber
      * @param $defaultFrequencyTime
      *
@@ -83,32 +82,60 @@ class FrequencyRuleRepository extends CommonRepository
 
     /**
      * @param null $channel
-     * @param null $leadId
+     * @param null $leadIds
      *
      * @return array
      */
-    public function getFrequencyRules($channel = null, $leadId = null)
+    public function getFrequencyRules($channel = null, $leadIds = null)
     {
         $q = $this->_em->getConnection()->createQueryBuilder();
 
-        $q->select('fr.id, fr.frequency_time, fr.frequency_number, fr.channel, fr.pause_from_date, fr.pause_to_date')
-            ->from(MAUTIC_TABLE_PREFIX.'lead_frequencyrules', 'fr');
+        $q->select(
+            'fr.id, fr.frequency_time, fr.frequency_number, fr.channel, fr.preferred_channel, fr.pause_from_date, fr.pause_to_date, fr.lead_id'
+        )
+          ->from(MAUTIC_TABLE_PREFIX.'lead_frequencyrules', 'fr');
 
         if ($channel) {
             $q->andWhere('fr.channel = :channel')
-                ->setParameter('channel', $channel);
+              ->setParameter('channel', $channel);
         }
 
-        if ($leadId) {
-            $q->andWhere('fr.lead_id = :leadId')
-                ->setParameter('leadId', $leadId);
+        $groupByLeads = is_array($leadIds);
+        if ($leadIds) {
+            if ($groupByLeads) {
+                $q->andWhere(
+                    $q->expr()->in('fr.lead_id', $leadIds)
+                );
+            } else {
+                $q->andWhere('fr.lead_id = :leadId')
+                  ->setParameter('leadId', (int) $leadIds);
+            }
         }
 
         $results = $q->execute()->fetchAll();
 
-        return $results;
+        $frequencyRules = [];
+
+        foreach ($results as $result) {
+            if ($groupByLeads) {
+                if (!isset($frequencyRules[$result['lead_id']])) {
+                    $frequencyRules[$result['lead_id']] = [];
+                }
+
+                $frequencyRules[$result['lead_id']][$result['channel']] = $result;
+            } else {
+                $frequencyRules[$result['channel']] = $result;
+            }
+        }
+
+        return $frequencyRules;
     }
 
+    /**
+     * @param $leadId
+     *
+     * @return array
+     */
     public function getPreferredChannel($leadId)
     {
         $q = $this->_em->getConnection()->createQueryBuilder();

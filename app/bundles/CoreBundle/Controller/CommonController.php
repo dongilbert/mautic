@@ -473,7 +473,9 @@ class CommonController extends Controller implements MauticController
     /**
      * Generate 404 not found message.
      *
-     * @param string $msg Message to log
+     * @param string $msg
+     *
+     * @return Response
      */
     public function notFound($msg = 'mautic.core.url.error.404')
     {

@@ -12,6 +12,7 @@
 namespace Mautic\LeadBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Mautic\ApiBundle\Serializer\Driver\ApiMetadataDriver;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 
 /**
@@ -19,6 +20,10 @@ use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
  */
 class FrequencyRule
 {
+    const TIME_DAY   = 'DAY';
+    const TIME_WEEK  = 'WEEK';
+    const TIME_MONTH = 'MONTH';
+
     /**
      * @var int
      */
@@ -108,41 +113,34 @@ class FrequencyRule
     }
 
     /**
-     * @return string
-     */
-    public function getChannel()
-    {
-        return $this->channel;
-    }
-
-    /**
-     * @param string $channel
-     */
-    public function setChannel($channel)
-    {
-        $this->channel = $channel;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getChannelId()
-    {
-        return $this->channelId;
-    }
-
-    /**
-     * @param mixed $channelId
+     * Prepares the metadata for API usage.
      *
-     * @return DoNotContact
+     * @param $metadata
      */
-    public function setChannelId($channelId)
+    public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
-        $this->channelId = $channelId;
+        $metadata->setGroupPrefix('frequencyRules')
+                 ->addListProperties(
+                     [
+                         'channel',
+                         'frequencyNumber',
+                         'frequencyTime',
+                         'preferredChannel',
+                         'pauseFromDate',
+                         'pauseToDate',
+                     ]
+                 )
+                 ->addProperties(
+                     [
+                         'lead',
+                         'dateAdded',
+                     ]
+                 )
+                 ->build();
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getId()
     {
@@ -159,10 +157,14 @@ class FrequencyRule
 
     /**
      * @param Lead $lead
+     *
+     * @return FrequencyRule
      */
-    public function setLead(Lead $lead)
+    public function setLead($lead)
     {
         $this->lead = $lead;
+
+        return $this;
     }
 
     /**
@@ -174,11 +176,15 @@ class FrequencyRule
     }
 
     /**
-     * @param mixed $dateAdded
+     * @param \DateTime $dateAdded
+     *
+     * @return FrequencyRule
      */
     public function setDateAdded($dateAdded)
     {
         $this->dateAdded = $dateAdded;
+
+        return $this;
     }
 
     /**
@@ -191,10 +197,14 @@ class FrequencyRule
 
     /**
      * @param int $frequencyNumber
+     *
+     * @return FrequencyRule
      */
     public function setFrequencyNumber($frequencyNumber)
     {
         $this->frequencyNumber = $frequencyNumber;
+
+        return $this;
     }
 
     /**
@@ -207,18 +217,42 @@ class FrequencyRule
 
     /**
      * @param string $frequencyTime
+     *
+     * @return FrequencyRule
      */
     public function setFrequencyTime($frequencyTime)
     {
         $this->frequencyTime = $frequencyTime;
+
+        return $this;
     }
 
     /**
-     * @param $preferredChannel
+     * @return string
      */
-    public function setPreferredChannel($preferredChannel)
+    public function getChannel()
     {
-        $this->preferredChannel = $preferredChannel;
+        return $this->channel;
+    }
+
+    /**
+     * @param string $channel
+     *
+     * @return FrequencyRule
+     */
+    public function setChannel($channel)
+    {
+        $this->channel = $channel;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPreferredChannel()
+    {
+        return $this->preferredChannel;
     }
 
     /**
@@ -230,15 +264,19 @@ class FrequencyRule
     }
 
     /**
-     * @param $pauseFromDate
+     * @param bool $preferredChannel
+     *
+     * @return FrequencyRule
      */
-    public function setPauseFromDate($pauseFromDate)
+    public function setPreferredChannel($preferredChannel)
     {
-        $this->pauseFromDate = $pauseFromDate;
+        $this->preferredChannel = $preferredChannel;
+
+        return $this;
     }
 
     /**
-     * @return datetime
+     * @return date
      */
     public function getPauseFromDate()
     {
@@ -246,18 +284,34 @@ class FrequencyRule
     }
 
     /**
-     * @param $pauseToDate
+     * @param date $pauseFromDate
+     *
+     * @return FrequencyRule
      */
-    public function setPauseToDate($pauseToDate)
+    public function setPauseFromDate($pauseFromDate)
     {
-        $this->pauseToDate = $pauseToDate;
+        $this->pauseFromDate = $pauseFromDate;
+
+        return $this;
     }
 
     /**
-     * @return datetime
+     * @return date
      */
     public function getPauseToDate()
     {
         return $this->pauseToDate;
+    }
+
+    /**
+     * @param date $pauseToDate
+     *
+     * @return FrequencyRule
+     */
+    public function setPauseToDate($pauseToDate)
+    {
+        $this->pauseToDate = $pauseToDate;
+
+        return $this;
     }
 }

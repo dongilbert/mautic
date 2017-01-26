@@ -153,7 +153,7 @@ Mautic.ajaxifyForm = function (formName) {
 };
 
 /**
- * Post a Mautic form
+ * Post a form
  *
  * @param form
  */
@@ -398,7 +398,7 @@ Mautic.updateEntitySelect = function (response) {
 
         if (mQueryParent(el).prop('disabled')) {
             mQueryParent(el).prop('disabled', false);
-            var emptyOption = mQuery('<option value="">' + mauticLang.chosenChooseOne + '</option>');
+                var emptyOption = mQuery('<option value="">' + mauticLang.chosenChooseOne + '</option>');
         } else {
             if (mQueryParent(el + ' option[value=""]').length) {
                 emptyOption = mQueryParent(el + ' option[value=""]').clone();
@@ -411,14 +411,13 @@ Mautic.updateEntitySelect = function (response) {
                 // Remove the new option and add it back after sorting
                 mQueryParent(el + ' option[value="new"]').remove();
             }
-
         }
 
         if (response.group) {
             var optgroup = el + ' optgroup[label="'+response.group+'"]';
             if (mQueryParent(optgroup).length) {
                 // update option when new option equal with option item in group.
-                var firstOptionGroups = mQueryParent(optgroup);
+                    var firstOptionGroups = mQueryParent(optgroup);
                 var isUpdateOption = false;
                 firstOptionGroups.each(function () {
                     var firstOptions = mQuery(this).children();
@@ -433,7 +432,7 @@ Mautic.updateEntitySelect = function (response) {
 
                 if (!isUpdateOption) {
                     //the optgroup exist so append to it
-                    mQueryParent(optgroup).append(newOption);
+                        mQueryParent(optgroup).append(newOption);
                 }
             } else {
                 //create the optgroup
@@ -443,6 +442,7 @@ Mautic.updateEntitySelect = function (response) {
             }
 
             var optionGroups = sortOptions(mQueryParent(el + ' optgroup'));
+
             optionGroups.each(function () {
                 var options = sortOptions(mQuery(this).children());
                 mQuery(this).html(options);

@@ -40,8 +40,10 @@ class ChannelSubscriber extends CommonSubscriber
             'notification',
             [
                 MessageModel::CHANNEL_FEATURE => [
+                    'campaignAction' => 'notification.send_notification',
                     'lookupFormType' => 'notification_list',
                     'detailView'     => 'MauticNotificationBundle:Notification:view',
+                    'mauticContent'  => 'notification',
                 ],
             ]
         );

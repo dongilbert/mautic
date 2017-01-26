@@ -27,7 +27,6 @@ class MessageRepository extends CommonRepository
      * @param string $search
      * @param int    $limit
      * @param int    $start
-     * @param bool   $viewOther
      *
      * @return array
      */
@@ -64,18 +63,24 @@ class MessageRepository extends CommonRepository
      *
      * @return array
      */
-    public function getChannelMessages($messageId)
+    public function getMessageChannels($messageId)
     {
         $q = $this->_em->getConnection()->createQueryBuilder();
         $q->from(MAUTIC_TABLE_PREFIX.'message_channels', 'mc')
-            ->select('id, channel, channel_id')
+            ->select('id, channel, channel_id, properties')
             ->where($q->expr()->eq('message_id', ':messageId'))
             ->setParameter('messageId', $messageId)
             ->andWhere($q->expr()->eq('is_enabled', true, 'boolean'));
 
-        $result = $q->execute()->fetchAll();
+        $results = $q->execute()->fetchAll();
 
-        return $result;
+        $channels = [];
+        foreach ($results as $result) {
+            $result['properties']         = json_decode($result['properties'], true);
+            $channels[$result['channel']] = $result;
+        }
+
+        return $channels;
     }
 
     /**

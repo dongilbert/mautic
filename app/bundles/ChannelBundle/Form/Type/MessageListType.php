@@ -42,7 +42,8 @@ class MessageListType extends AbstractType
                 'model_lookup_method' => 'getLookupResults',
                 'lookup_arguments'    => function (Options $options) {
                     return [
-                        'type'    => 'message',
+                        'type'    => 'channel.message',
+                        'filter'  => '$data',
                         'limit'   => 0,
                         'start'   => 0,
                         'options' => [

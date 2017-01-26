@@ -12,7 +12,6 @@
 namespace Mautic\ChannelBundle\Form\Type;
 
 use Mautic\ChannelBundle\Model\MessageModel;
-use Mautic\CoreBundle\Factory\MauticFactory;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -28,7 +27,10 @@ class MessageSendType extends AbstractType
     protected $messageModel;
 
     /**
-     * @param MauticFactory $factory
+     * MessageSendType constructor.
+     *
+     * @param RouterInterface $router
+     * @param MessageModel    $messageModel
      */
     public function __construct(RouterInterface $router, MessageModel $messageModel)
     {

@@ -15,14 +15,19 @@
         <?php foreach ($tabs as $tab): ?>
             <?php
             $class = (!empty($tab['class'])) ? ' '.$tab['class'] : '';
-            $attr  = (!empty($tab['attr'])) ? ' '.$tab['attr'] : '';
+            if (isset($tab['attr']) && is_array($tab['attr'])) {
+                $attr = [];
+                foreach ($tab['attr'] as $key => $val) {
+                    $attr[] = "$key=\"$val\"";
+                }
+                $tab['attr'] = implode(' ', $attr);
+            }
+            $attr = (!empty($tab['attr'])) ? ' '.$tab['attr'] : '';
             if (!empty($tab['published']) && empty($tab['icon'])) {
                 $tab['icon'] = 'fa-check-circle text-success';
             }
             ?>
-            <li class="<?php if (!empty($tab['active'])) {
-                echo 'active';
-            } ?><?php echo $class; ?>"<?php echo $attr; ?>>
+            <li class="<?php if (!empty($tab['active'])): echo 'active'; endif; ?><?php echo $class; ?>"<?php echo $attr; ?>>
                 <a href="#<?php echo $tab['id']; ?>" role="tab" data-toggle="tab" class="<?php echo $class; ?>">
                     <?php echo $tab['name']; ?>
                     <?php if (!empty($tab['icon'])): ?>
@@ -37,7 +42,14 @@
     <?php foreach ($tabs as $tab): ?>
         <?php
         $containerClass = (!empty($tab['containerClass'])) ? ' '.$tab['containerClass'] : '';
-        $containerAttr  = (!empty($tab['containerAttr'])) ? ' '.$tab['containerAttr'] : '';
+        if (isset($tab['containerAttr']) && is_array($tab['containerAttr'])) {
+            $attr = [];
+            foreach ($tab['containerAttr'] as $key => $val) {
+                $attr[] = "$key=\"$val\"";
+            }
+            $tab['containerAttr'] = implode(' ', $attr);
+        }
+        $containerAttr = (!empty($tab['containerAttr'])) ? ' '.$tab['containerAttr'] : '';
         ?>
         <div class="tab-pane fade <?php echo (!empty($tab['active'])) ? 'in active' : ''; ?> bdr-w-0<?php echo $containerClass; ?>" id="<?php echo $tab['id']; ?>"<?php echo $containerAttr; ?>>
             <?php echo $tab['content']; ?>

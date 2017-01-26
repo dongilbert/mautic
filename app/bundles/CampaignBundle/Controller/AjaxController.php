@@ -11,8 +11,11 @@
 
 namespace Mautic\CampaignBundle\Controller;
 
+use Mautic\CampaignBundle\Entity\LeadEventLog;
+use Mautic\CampaignBundle\Model\EventLogModel;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Helper\InputHelper;
+use Mautic\LeadBundle\Entity\Lead;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -41,21 +44,99 @@ class AjaxController extends CommonAjaxController
         return $this->sendJsonResponse($dataArray);
     }
 
-    protected function setEventCampaignType()
+    /**
+     * @param Request $request
+     */
+    protected function updateScheduledCampaignEventAction(Request $request)
     {
+        $eventId      = (int) $request->request->get('eventId');
+        $contactId    = (int) $request->request->get('contactId');
+        $newDate      = InputHelper::clean($request->request->get('date'));
+        $originalDate = InputHelper::clean($request->request->get('originalDate'));
+
+        $dataArray = ['success' => 0, 'date' => $originalDate];
+
+        if (!empty($eventId) && !empty($contactId) && !empty($newDate)) {
+            if ($log = $this->getContactEventLog($eventId, $contactId)) {
+                $newDate = new \DateTime($newDate);
+
+                if ($newDate >= new \DateTime()) {
+                    $log->setTriggerDate($newDate)
+                        ->setIsScheduled(true);
+
+                    /** @var EventLogModel $logModel */
+                    $logModel = $this->getModel('campaign.event_log');
+                    $logModel->saveEntity($log);
+
+                    $dataArray = [
+                        'success' => 1,
+                        'date'    => $newDate->format('Y-m-d H:i:s'),
+                    ];
+                }
+            }
+        }
+
+        // Format the date to match the view
+        $dataArray['formattedDate'] = $this->get('mautic.helper.template.date')->toFull($dataArray['date']);
+
+        return $this->sendJsonResponse($dataArray);
     }
 
-    protected function setBuilderEventCampaignTypeAction(Request $request)
+    /**
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    protected function cancelScheduledCampaignEventAction(Request $request)
     {
-        $campaignType = InputHelper::clean($request->query->get('campaignType'));
-        $this->getModel('campaign')->setEventsCampaignType($campaignType);
+        $dataArray = ['success' => 0];
 
-        if (empty($campaignType)) {
-            $dataArray = ['success' => 0];
-        } else {
-            $dataArray = ['success' => 1];
+        $eventId   = (int) $request->request->get('eventId');
+        $contactId = (int) $request->request->get('contactId');
+        if (!empty($eventId) && !empty($contactId)) {
+            if ($log = $this->getContactEventLog($eventId, $contactId)) {
+                $log->setIsScheduled(false);
+
+                /** @var EventLogModel $logModel */
+                $logModel = $this->getModel('campaign.event_log');
+                $logModel->saveEntity($log);
+
+                $dataArray = ['success' => 1];
+            }
         }
 
         return $this->sendJsonResponse($dataArray);
+    }
+
+    /**
+     * @param $eventId
+     * @param $contactId
+     *
+     * @return LeadEventLog|null
+     */
+    protected function getContactEventLog($eventId, $contactId)
+    {
+        $contact = $this->getModel('lead')->getEntity($contactId);
+        if ($contact) {
+            if ($this->get('mautic.security')->hasEntityAccess('lead:leads:editown', 'lead:leads:editother', $contact->getPermissionUser())) {
+                /** @var EventLogModel $logModel */
+                $logModel = $this->getModel('campaign.event_log');
+
+                /** @var LeadEventLog $log */
+                $log = $logModel->getRepository()
+                                ->findOneBy(
+                                    [
+                                        'lead'  => $contactId,
+                                        'event' => $eventId,
+                                    ]
+                                );
+
+                if ($log && !$log->getDateTriggered()) {
+                    return $log;
+                }
+            }
+        }
+
+        return null;
     }
 }

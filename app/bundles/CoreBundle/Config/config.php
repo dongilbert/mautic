@@ -332,8 +332,10 @@ return [
             ],
             'mautic.helper.template.canvas' => [
                 'class'     => 'Mautic\CoreBundle\Templating\Helper\SidebarCanvasHelper',
-                'arguments' => 'mautic.factory',
-                'alias'     => 'canvas',
+                'arguments' => [
+                    'event_dispatcher',
+                ],
+                'alias' => 'canvas',
             ],
             'mautic.helper.template.button' => [
                 'class'     => 'Mautic\CoreBundle\Templating\Helper\ButtonHelper',
@@ -343,6 +345,14 @@ return [
                     'event_dispatcher',
                 ],
                 'alias' => 'buttons',
+            ],
+            'mautic.helper.template.content' => [
+                'class'     => 'Mautic\CoreBundle\Templating\Helper\ContentHelper',
+                'arguments' => [
+                    'templating',
+                    'event_dispatcher',
+                ],
+                'alias' => 'content',
             ],
             'mautic.helper.template.formatter' => [
                 'class'     => 'Mautic\CoreBundle\Templating\Helper\FormatterHelper',

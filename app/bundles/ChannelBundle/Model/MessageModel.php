@@ -97,9 +97,12 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
     }
 
     /**
-     * @param             $entity
+     * @param object      $entity
      * @param FormFactory $formFactory
-     * @param             $action
+     * @param null        $action
+     * @param array       $options
+     *
+     * @return \Symfony\Component\Form\FormInterface
      */
     public function createForm($entity, $formFactory, $action = null, $options = [])
     {
@@ -143,12 +146,13 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
 
         return $channels;
     }
+
     /**
-     * Get list of entities for autopopulate fields.
-     *
-     * @param $type
-     * @param $filter
-     * @param $limit
+     * @param        $type
+     * @param string $filter
+     * @param int    $limit
+     * @param int    $start
+     * @param array  $options
      *
      * @return array
      */
@@ -177,9 +181,14 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
         return $results;
     }
 
-    public function getChannelMessages($messageId)
+    /**
+     * @param $messageId
+     *
+     * @return array
+     */
+    public function getMessageChannels($messageId)
     {
-        return $this->getRepository()->getChannelMessages($messageId);
+        return $this->getRepository()->getMessageChannels($messageId);
     }
 
     public function getChannelMessageByChannelId($channelId)

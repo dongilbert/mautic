@@ -97,6 +97,8 @@ class CampaignSubscriber extends CommonSubscriber
             'formType'        => 'emailsend_list',
             'formTypeOptions' => ['update_select' => 'campaignevent_properties_email', 'with_email_types' => true],
             'formTheme'       => 'MauticEmailBundle:FormTheme\EmailSendList',
+            'channel'         => 'email',
+            'channelIdField'  => 'email',
         ];
         $event->addAction('email.send', $action);
     }
@@ -158,6 +160,7 @@ class CampaignSubscriber extends CommonSubscriber
                 'email_attempts' => (isset($config['attempts'])) ? $config['attempts'] : 3,
                 'email_priority' => (isset($config['priority'])) ? $config['priority'] : 2,
                 'email_type'     => $type,
+                'return_errors'  => true,
             ];
 
             $event->setChannel('email', $emailId);
@@ -174,6 +177,16 @@ class CampaignSubscriber extends CommonSubscriber
 
                 if (empty($stats)) {
                     $emailSent = $this->emailModel->sendEmail($email, $leadCredentials, $options);
+                }
+
+                if (is_array($emailSent)) {
+                    $errors = implode('<br />', $emailSent);
+
+                    // Add to the metadata of the failed event
+                    $emailSent = [
+                        'result' => false,
+                        'errors' => $errors,
+                    ];
                 }
             } else {
                 return $event->setFailed('Email not found or published');

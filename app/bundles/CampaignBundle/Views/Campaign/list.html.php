@@ -11,6 +11,7 @@
 if ($tmpl == 'index') {
     $view->extend('MauticCampaignBundle:Campaign:index.html.php');
 }
+
 ?>
 <?php if (count($items)): ?>
     <div class="table-responsive">
@@ -64,9 +65,7 @@ if ($tmpl == 'index') {
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($items as $item):
-                $type = $item->getCampaignType();
-                ?>
+            <?php foreach ($items as $item): ?>
                 <tr>
                     <td>
                         <?php
@@ -98,14 +97,7 @@ if ($tmpl == 'index') {
                                 ['objectAction' => 'view', 'objectId' => $item->getId()]
                             ); ?>" data-toggle="ajax">
                                 <?php echo $item->getName(); ?>
-
-                                <?php if ($type == 'intelligent'): ?>
-                                    <span data-toggle="tooltip" title="<?php echo $view['translator']->trans(
-                                        'mautic.email.icon_tooltip.intelligent_campaign'
-                                    ); ?>">
-                                <i class="fa fa-fw fa-magic"></i>
-                            </span>
-                                <?php endif; ?>
+                            <?php echo $view['content']->getCustomContent('MauticCampaignBundle:Campaign:list.html.php', 'campaign.name', get_defined_vars()); ?>
                             </a>
                         </div>
                         <?php if ($description = $item->getDescription()): ?>

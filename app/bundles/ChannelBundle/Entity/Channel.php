@@ -95,6 +95,12 @@ class Channel extends CommonEntity
                     'id',
                     'channel',
                     'channelId',
+                    'isEnabled',
+                ]
+            )
+            ->addProperties(
+                [
+                    'properties',
                     'message',
                 ]
             )

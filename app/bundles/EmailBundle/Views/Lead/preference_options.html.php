@@ -45,7 +45,7 @@ JS;
                         echo $view['translator']->trans('mautic.lead.message.preferences.descr'); ?></small>
                 </div>
                 <table class="table table-striped">
-                    <?php foreach ($form['doNotContactChannels']->vars['choices'] as $channel):
+                    <?php foreach ($form['subscribed_channels']->vars['choices'] as $channel):
                         $contactMe   = isset($leadChannels[$channel->value]);
                         $checked     = $contactMe ? 'checked' : '';
                         $channelName = strtolower($view['translator']->hasId('mautic.channel.'.$channel->value) ?
@@ -55,7 +55,7 @@ JS;
                         <td>
                             <div class="text-left">
                                 <input type="checkbox" id="<?php echo $channel->value ?>"
-                                       name="lead_contact_frequency_rules[doNotContactChannels][]"
+                                       name="lead_contact_frequency_rules[subscribed_channels][]"
                                        onclick="togglePreferredChannel(this.value);"
                                        value="<?php echo $channel->value ?>" <?php echo $checked; ?>>
                                 <label for="<?php echo $channel->value ?>" id="is-contactable-<?php echo $channel->value ?>">
@@ -149,6 +149,6 @@ JS;
     </div>
 
     <?php
-    unset($form['doNotContactChannels']);
+    unset($form['subscribed_channels']);
     echo $view['form']->end($form); ?>
 </div>

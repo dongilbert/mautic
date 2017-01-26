@@ -25,7 +25,7 @@ $leadName = $lead->getPrimaryIdentifier();
             <thead >
             <tr >
                 <th>
-                    <input type="checkbox" id="lead_contact_frequency_rules_doNotContactChannels_0" name="check_all"
+                    <input type="checkbox" id="lead_contact_frequency_rules_subscribed_channels_0" name="check_all"
                            onclick="Mautic.togglePreferredChannel('all');" value="all">
                 </th>
                 <th>
@@ -38,7 +38,7 @@ $leadName = $lead->getPrimaryIdentifier();
             <tbody >
 
 
-            <?php foreach ($form['doNotContactChannels']->vars['choices'] as $channel): ?>
+            <?php foreach ($form['subscribed_channels']->vars['choices'] as $channel): ?>
                 <?php
                 $contactMe     = isset($leadChannels[$channel->value]);
                 $isContactable = $contactMe ? '' : 'text-muted';
@@ -49,7 +49,7 @@ $leadName = $lead->getPrimaryIdentifier();
                 <tr>
                     <th style="vertical-align: top" class="col-md-1">
                         <input type="checkbox" id="<?php echo $channel->value ?>"
-                               name="lead_contact_frequency_rules[doNotContactChannels][]" class="control-label"
+                               name="lead_contact_frequency_rules[subscribed_channels][]" class="control-label"
                                onclick="Mautic.togglePreferredChannel(this.value);"
                                value="<?php echo $channel->value ?>" <?php echo $checked; ?>>
                     </th>
@@ -107,7 +107,7 @@ $leadName = $lead->getPrimaryIdentifier();
     <div id="categories" class="tab-pane fade">
         <?php
         unset($form['preferred_channel']);
-        unset($form['doNotContactChannels']); ?>
+        unset($form['subscribed_channels']); ?>
 
         <table class="table" width="100%">
             <thead >

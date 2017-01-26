@@ -61,11 +61,6 @@ class Message extends FormEntity
     private $channels;
 
     /**
-     * @var ArrayCollection
-     */
-    private $stats;
-
-    /**
      * @param ClassMetadata $metadata
      */
     public static function loadMetadata(ClassMetadata $metadata)
@@ -88,18 +83,10 @@ class Message extends FormEntity
                 ->cascadePersist()
                 ->cascadeDetach()
                 ->build();
-        $builder->createOneToMany('stats', Stat::class)
-                ->mappedBy('message')
-                ->orphanRemoval()
-                ->cascadeMerge()
-                ->cascadePersist()
-                ->cascadeDetach()
-                ->fetchExtraLazy()
-                ->build();
     }
 
     /**
-     * @param ClassMetadata $metadata
+     * @param ValidationClassMetadata $metadata
      */
     public static function loadValidatorMetadata(ValidationClassMetadata $metadata)
     {
@@ -140,17 +127,6 @@ class Message extends FormEntity
     public function __construct()
     {
         $this->channels = new ArrayCollection();
-        $this->stats    = new ArrayCollection();
-    }
-
-    /**
-     * On clone.
-     */
-    public function __clone()
-    {
-        parent::__clone();
-
-        $this->stats = new ArrayCollection();
     }
 
     /**
@@ -302,41 +278,5 @@ class Message extends FormEntity
             $this->isChanged('channels', $channel->getId());
         }
         $this->channels->removeElement($channel);
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getStats()
-    {
-        return $this->stats;
-    }
-
-    /**
-     * @param ArrayCollection $stats
-     *
-     * @return Message
-     */
-    public function setStats($stats)
-    {
-        $this->stats = $stats;
-
-        return $this;
-    }
-
-    /**
-     * @param Stat $stat
-     */
-    public function addStat(Stat $stat)
-    {
-        $this->stats[] = $stat;
-    }
-
-    /**
-     * @param Stat $stat
-     */
-    public function removeStat(Stat $stat)
-    {
-        $this->stats->removeElement($stat);
     }
 }

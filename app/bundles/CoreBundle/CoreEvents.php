@@ -125,6 +125,15 @@ final class CoreEvents
     const VIEW_INJECT_CUSTOM_BUTTONS = 'mautic.view_inject_custom_buttons';
 
     /**
+     * The mautic.view_inject_custom_content event is dispatched by views to collect custom content to be injected in UIs.
+     *
+     * The event listener receives a Mautic\CoreBundle\Event\CustomContentEvent instance.
+     *
+     * @var string
+     */
+    const VIEW_INJECT_CUSTOM_CONTENT = 'mautic.view_inject_custom_content';
+
+    /**
      * The mautic.channel_broadcast event is dispatched by the mautic:send:broadcast command to process communication to pending contacts.
      *
      * The event listener receives a Mautic\CoreBundle\Event\ChannelBroadcastEvent instance.
