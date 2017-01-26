@@ -615,9 +615,10 @@ class ListModel extends FormModel
                     break;
                 }
 
+                $processedLeads = [];
                 foreach ($newLeadList[$id] as $l) {
                     $this->addLead($l, $entity, false, true, -1, $localDateTime);
-
+                    $processedLeads[] = $l;
                     unset($l);
 
                     ++$leadsProcessed;
@@ -633,11 +634,11 @@ class ListModel extends FormModel
                 $start += $limit;
 
                 // Dispatch batch event
-                if ($this->dispatcher->hasListeners(LeadEvents::LEAD_LIST_BATCH_CHANGE)) {
-                    $event = new ListChangeEvent($newLeadList[$id], $entity, true);
-                    $this->dispatcher->dispatch(LeadEvents::LEAD_LIST_BATCH_CHANGE, $event);
-
-                    unset($event);
+                if (count($processedLeads) && $this->dispatcher->hasListeners(LeadEvents::LEAD_LIST_BATCH_CHANGE)) {
+                    $this->dispatcher->dispatch(
+                        LeadEvents::LEAD_LIST_BATCH_CHANGE,
+                        new ListChangeEvent($processedLeads, $entity, true)
+                    );
                 }
 
                 unset($newLeadList);
@@ -715,9 +716,10 @@ class ListModel extends FormModel
                     break;
                 }
 
+                $processedLeads = [];
                 foreach ($removeLeadList[$id] as $l) {
                     $this->removeLead($l, $entity, false, true, true);
-
+                    $processedLeads[] = $l;
                     ++$leadsProcessed;
                     if ($output && $leadsProcessed < $maxCount) {
                         $progress->setProgress($leadsProcessed);
@@ -729,11 +731,11 @@ class ListModel extends FormModel
                 }
 
                 // Dispatch batch event
-                if ($this->dispatcher->hasListeners(LeadEvents::LEAD_LIST_BATCH_CHANGE)) {
-                    $event = new ListChangeEvent($removeLeadList[$id], $entity, false);
-                    $this->dispatcher->dispatch(LeadEvents::LEAD_LIST_BATCH_CHANGE, $event);
-
-                    unset($event);
+                if (count($processedLeads) && $this->dispatcher->hasListeners(LeadEvents::LEAD_LIST_BATCH_CHANGE)) {
+                    $this->dispatcher->dispatch(
+                        LeadEvents::LEAD_LIST_BATCH_CHANGE,
+                        new ListChangeEvent($processedLeads, $entity, false)
+                    );
                 }
 
                 $start += $limit;
@@ -1160,6 +1162,17 @@ class ListModel extends FormModel
         return $results;
     }
 
+    /**
+     * @param           $unit
+     * @param \DateTime $dateFrom
+     * @param \DateTime $dateTo
+     * @param           $dateFormat
+     * @param           $filter
+     * @param           $canViewOthers
+     * @param           $listName
+     *
+     * @return array
+     */
     public function getLifeCycleSegmentChartData($unit, \DateTime $dateFrom, \DateTime $dateTo, $dateFormat, $filter, $canViewOthers, $listName)
     {
         $chart = new PieChart();
@@ -1193,13 +1206,11 @@ class ListModel extends FormModel
     }
 
     /**
-     * Get bar chart data of hits.
-     *
-     * @param char     $unit       {@link php.net/manual/en/function.date.php#refsect1-function.date-parameters}
-     * @param DateTime $dateFrom
-     * @param DateTime $dateTo
-     * @param string   $dateFormat
-     * @param array    $filter
+     * @param           $unit
+     * @param \DateTime $dateFrom
+     * @param \DateTime $dateTo
+     * @param null      $dateFormat
+     * @param array     $filter
      *
      * @return array
      */
@@ -1264,14 +1275,13 @@ class ListModel extends FormModel
 
         return $chartData;
     }
+
     /**
-     * Get bar chart data of hits.
-     *
-     * @param char     $unit       {@link php.net/manual/en/function.date.php#refsect1-function.date-parameters}
-     * @param DateTime $dateFrom
-     * @param DateTime $dateTo
-     * @param string   $dateFormat
-     * @param array    $filter
+     * @param           $unit
+     * @param \DateTime $dateFrom
+     * @param \DateTime $dateTo
+     * @param null      $dateFormat
+     * @param array     $filter
      *
      * @return array
      */
