@@ -45,6 +45,7 @@ class ChannelSubscriber extends CommonSubscriber
                     'channelTemplate'    => 'MauticSocialBundle:SubscribedEvents\Channel:message.html.php',
                     'formTheme'          => 'MauticSocialBundle:FormTheme',
                     'detailView'         => 'MauticSocialBundle:Monitoring:view',
+                    'mauticContent'      => 'monitoring',
                 ],
             ]
         );

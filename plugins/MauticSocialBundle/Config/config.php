@@ -130,9 +130,10 @@ return [
     'menu' => [
         'main' => [
             'mautic.social.monitoring' => [
-                'route'  => 'mautic_social_index',
-                'parent' => 'mautic.core.components',
-                'access' => 'plugin:mauticSocial:monitoring:view',
+                'route'    => 'mautic_social_index',
+                'parent'   => 'mautic.core.channels',
+                'access'   => 'plugin:mauticSocial:monitoring:view',
+                'priority' => 0,
             ],
         ],
     ],

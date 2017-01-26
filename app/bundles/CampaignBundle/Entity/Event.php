@@ -256,24 +256,30 @@ class Event
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
         $metadata->setGroupPrefix('campaignEvent')
-            ->addProperties(
+            ->addListProperties(
                 [
                     'id',
                     'name',
                     'description',
                     'type',
                     'eventType',
+                    'channel',
+                    'channelId',
+                ]
+            )
+            ->addProperties(
+                [
                     'order',
                     'properties',
                     'triggerDate',
                     'triggerInterval',
                     'triggerIntervalUnit',
                     'triggerMode',
-                    'children',
-                    'parent',
                     'decisionPath',
                     'channel',
                     'channelId',
+                    'parent',
+                    'children',
                 ]
             )
             ->setMaxDepth(1, 'parent')
@@ -288,6 +294,8 @@ class Event
                      'description',
                      'type',
                      'eventType',
+                     'channel',
+                     'channelId',
                  ]
              )
              ->addProperties(
@@ -322,6 +330,8 @@ class Event
                     'decisionPath',
                     'order',
                     'parent',
+                    'channel',
+                    'channelId',
                 ]
             )
             ->addProperties(

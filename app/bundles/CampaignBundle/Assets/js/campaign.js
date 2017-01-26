@@ -370,26 +370,6 @@ Mautic.campaignBuilderUpdateLabel = function (domEventId) {
 };
 
 /**
- * Change the links in the available event list when the campaign type is changed
- */
-Mautic.updateCampaignEventLinks = function () {
-    //find and update all the event links with the campaign type
-
-    var campaignType = mQuery('#campaign_type .active input').val();
-    if (typeof campaignType == 'undefined') {
-        campaignType = 'interval';
-    }
-
-    mQuery('#campaignEventList a').each(function () {
-        var href    = mQuery(this).attr('href');
-        var newType = (campaignType == 'interval') ? 'date' : 'interval';
-
-        href = href.replace('campaignType=' + campaignType, 'campaignType=' + newType);
-        mQuery(this).attr('href', href);
-    });
-};
-
-/**
  * Launch campaign builder modal
  */
 Mautic.launchCampaignEditor = function() {

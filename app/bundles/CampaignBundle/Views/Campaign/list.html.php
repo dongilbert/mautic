@@ -65,9 +65,7 @@ if ($tmpl == 'index') {
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($items as $item):
-                $type = $item->getCampaignType();
-                ?>
+            <?php foreach ($items as $item): ?>
                 <tr>
                     <td>
                         <?php

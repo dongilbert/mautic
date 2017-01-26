@@ -150,6 +150,7 @@ return [
                             'sms_enabled' => true,
                         ],
                     ],
+                    'priority' => 70,
                 ],
             ],
         ],

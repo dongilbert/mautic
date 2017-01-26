@@ -335,6 +335,11 @@ $container->loadFromExtension('jms_serializer', [
         'auto_detection' => false,
         'directories'    => $serializerMappings,
     ],
+    'visitors' => [
+        'json' => [
+            'options' => JSON_PRETTY_PRINT,
+        ],
+    ],
 ]);
 
 $container->setParameter(
