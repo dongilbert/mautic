@@ -181,4 +181,22 @@ class MessageModel extends FormModel implements AjaxLookupModelInterface
     {
         return $this->getRepository()->getChannelMessages($messageId);
     }
+
+    public function getChannelMessageByChannelId($channelId)
+    {
+        return $this->getRepository()->getChannelMessageByChannelId($channelId);
+    }
+
+    /**
+     * @param $dateFrom
+     * @param $dateTo
+     * @param $options
+     *
+     * @return array
+     */
+    public function getLeadStatsPost($dateFrom, $dateTo, $options)
+    {
+        //todo get stats for channel messages
+        return [0, time()];
+    }
 }

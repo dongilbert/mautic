@@ -43,7 +43,7 @@ class ChannelSubscriber extends CommonSubscriber
                     'propertiesFormType' => 'twitter_tweet',
                     'channelTemplate'    => 'MauticSocialBundle:SubscribedEvents\Channel:message.html.php',
                     'formTheme'          => 'MauticSocialBundle:FormTheme',
-                    'detailView'         => 'MauticSocialBundle:Monitoring:view',
+                    'detailView'         => 'MauticChannelBundle:Message:viewTwitter',
                 ],
             ]
         );

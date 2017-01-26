@@ -36,7 +36,7 @@ class ChannelSubscriber extends CommonSubscriber
      */
     public function onAddChannel(ChannelEvent $event)
     {
-        $event->addChannel(
+        /* $event->addChannel(
             'dynamicContent',
             [
                 MessageModel::CHANNEL_FEATURE => [
@@ -44,6 +44,6 @@ class ChannelSubscriber extends CommonSubscriber
                     'detailView'     => 'MauticDynamicContentBundle:DynamicContent:view',
                 ],
             ]
-        );
+        );*/
     }
 }
