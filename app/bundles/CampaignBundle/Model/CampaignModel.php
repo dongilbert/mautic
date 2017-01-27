@@ -63,6 +63,11 @@ class CampaignModel extends CommonFormModel
     protected $formModel;
 
     /**
+     * @var
+     */
+    protected static $events;
+
+    /**
      * CampaignModel constructor.
      *
      * @param CoreParametersHelper $coreParametersHelper
@@ -299,6 +304,7 @@ class CampaignModel extends CommonFormModel
                 ];
             }
         }
+
         // Assign parent/child relationships
         foreach ($events as $id => $e) {
             if (isset($relationships[$id])) {
@@ -489,7 +495,9 @@ class CampaignModel extends CommonFormModel
      */
     public function getEvents($type = null)
     {
-        static $events;
+        if (!isset(self::$events)) {
+            self::$events = [];
+        }
 
         if (empty($events)) {
             //build them
@@ -536,17 +544,19 @@ class CampaignModel extends CommonFormModel
 
             $events['connectionResrictions'] = $associationRestrictions;
             $events['anchorRestrictions']    = $anchorRestrictions;
+
+            self::$events = $events;
         }
 
         if (null !== $type) {
-            if (!isset($events[$type])) {
+            if (!isset(self::$events[$type])) {
                 throw new \InvalidArgumentException("$type not found as array key");
             }
 
-            return $events[$type];
+            return self::$events[$type];
         }
 
-        return $events;
+        return self::$events;
     }
 
     /**
@@ -998,9 +1008,10 @@ class CampaignModel extends CommonFormModel
 
                 $start += $limit;
 
+                $processedLeads = [];
                 foreach ($newLeadList as $l) {
                     $this->addLeads($campaign, [$l], false, true, -1);
-
+                    $processedLeads[] = $l;
                     ++$leadsProcessed;
                     if ($output && $leadsProcessed < $maxCount) {
                         $progress->setProgress($leadsProcessed);
@@ -1009,19 +1020,31 @@ class CampaignModel extends CommonFormModel
                     unset($l);
 
                     if ($maxLeads && $leadsProcessed >= $maxLeads) {
-                        // done for this round, bye bye
-                        if ($output) {
-                            $progress->finish();
-                        }
-
-                        return $leadsProcessed;
+                        break;
                     }
+                }
+
+                // Dispatch batch event
+                if (count($processedLeads) && $this->dispatcher->hasListeners(CampaignEvents::LEAD_CAMPAIGN_BATCH_CHANGE)) {
+                    $this->dispatcher->dispatch(
+                        CampaignEvents::LEAD_CAMPAIGN_BATCH_CHANGE,
+                        new Events\CampaignLeadChangeEvent($campaign, $processedLeads, 'added')
+                    );
                 }
 
                 unset($newLeadList);
 
                 // Free some memory
                 gc_collect_cycles();
+
+                if ($maxLeads && $leadsProcessed >= $maxLeads) {
+                    // done for this round, bye bye
+                    if ($output) {
+                        $progress->finish();
+                    }
+
+                    return $leadsProcessed;
+                }
             }
 
             if ($output) {
@@ -1071,20 +1094,26 @@ class CampaignModel extends CommonFormModel
                     ]
                 );
 
+                $processedLeads = [];
                 foreach ($removeLeadList as $l) {
                     $this->removeLeads($campaign, [$l], false, true, true);
-
+                    $processedLeads[] = $l;
                     ++$leadsProcessed;
                     if ($output && $leadsProcessed < $maxCount) {
                         $progress->setProgress($leadsProcessed);
                     }
 
                     if ($maxLeads && $leadsProcessed >= $maxLeads) {
-                        // done for this round, bye bye
-                        $progress->finish();
-
-                        return $leadsProcessed;
+                        break;
                     }
+                }
+
+                // Dispatch batch event
+                if (count($processedLeads) && $this->dispatcher->hasListeners(CampaignEvents::LEAD_CAMPAIGN_BATCH_CHANGE)) {
+                    $this->dispatcher->dispatch(
+                        CampaignEvents::LEAD_CAMPAIGN_BATCH_CHANGE,
+                        new Events\CampaignLeadChangeEvent($campaign, $processedLeads, 'removed')
+                    );
                 }
 
                 $start += $limit;
@@ -1093,6 +1122,13 @@ class CampaignModel extends CommonFormModel
 
                 // Free some memory
                 gc_collect_cycles();
+
+                if ($maxLeads && $leadsProcessed >= $maxLeads) {
+                    // done for this round, bye bye
+                    $progress->finish();
+
+                    return $leadsProcessed;
+                }
             }
 
             if ($output) {
@@ -1178,8 +1214,8 @@ class CampaignModel extends CommonFormModel
 
         if (!$canViewOthers) {
             $q->join('t', MAUTIC_TABLE_PREFIX.'campaigns', 'c', 'c.id = c.campaign_id')
-                ->andWhere('c.created_by = :userId')
-                ->setParameter('userId', $this->userHelper->getUser()->getId());
+              ->andWhere('c.created_by = :userId')
+              ->setParameter('userId', $this->userHelper->getUser()->getId());
         }
 
         $data = $query->loadAndBuildTimeData($q);
@@ -1237,11 +1273,5 @@ class CampaignModel extends CommonFormModel
         }
 
         return $chart->render();
-    }
-
-    public function setEventsCampaignType($campaignType)
-    {
-        $event = new Events\CampaignBuilderEvent($this->translator);
-        $event->setCampaignType($campaignType);
     }
 }

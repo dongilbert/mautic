@@ -123,7 +123,7 @@ class CampaignSubscriber extends CommonSubscriber
             $pageHitId = 0;
         }
 
-        $limitToPages = $config['pages'];
+        $limitToPages = (isset($config['pages'])) ? $config['pages'] : [];
 
         $urlMatches = [];
 

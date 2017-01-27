@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright   2016 Mautic Contributors. All rights reserved
+ * @copyright   2017 Mautic Contributors. All rights reserved
  * @author      Mautic
  *
  * @link        http://mautic.org
@@ -17,7 +17,7 @@ use Mautic\CoreBundle\Doctrine\AbstractMauticMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-class Version20161206183635 extends AbstractMauticMigration
+class Version20170109025947 extends AbstractMauticMigration
 {
     /**
      * @param Schema $schema
@@ -27,8 +27,7 @@ class Version20161206183635 extends AbstractMauticMigration
      */
     public function preUp(Schema $schema)
     {
-        $table = $schema->getTable($this->prefix.'campaigns');
-        if ($table->hasColumn('campaign_type')) {
+        if ($schema->getTable(MAUTIC_TABLE_PREFIX.'focus_stats')->hasColumn('lead_id')) {
             throw new SkipMigrationException('Schema includes this migration');
         }
     }
@@ -38,6 +37,8 @@ class Version20161206183635 extends AbstractMauticMigration
      */
     public function up(Schema $schema)
     {
-        $this->addSql("ALTER TABLE {$this->prefix}campaigns ADD campaign_type varchar(60) DEFAULT NULL");
+        $this->addSql("ALTER TABLE {$this->prefix}focus_stats ADD lead_id INT DEFAULT NULL");
+        $this->addSql("ALTER TABLE {$this->prefix}focus_stats ADD CONSTRAINT ".$this->generatePropertyName('focus_stats', 'fk', ['lead_id'])." FOREIGN KEY (lead_id) REFERENCES {$this->prefix}leads (id) ON DELETE SET NULL");
+        $this->addSql('CREATE INDEX '.$this->generatePropertyName('focus_stats', 'idx', ['lead_id'])." ON {$this->prefix}focus_stats (lead_id)");
     }
 }

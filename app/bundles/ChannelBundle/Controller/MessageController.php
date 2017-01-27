@@ -13,6 +13,7 @@ namespace Mautic\ChannelBundle\Controller;
 
 use Mautic\ChannelBundle\Model\MessageModel;
 use Mautic\CoreBundle\Controller\AbstractStandardFormController;
+use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Symfony\Component\Form\Form;
 
 /**
@@ -46,12 +47,17 @@ class MessageController extends AbstractStandardFormController
                 ];
 
                 break;
+            case 'viewTwitter':
+                $viewParameters = [
+                    'contentTemplate' => $this->getStandardTemplate('details_twitter.html.php'),
+
+                ];
+                break;
             case 'view':
                 $viewParameters = [
                     'channels'        => $model->getChannels(),
                     'channelContents' => $model->getMessageChannels($args['viewParameters']['item']->getId()),
                 ];
-
                 break;
             case 'new':
             case 'edit':
@@ -133,6 +139,79 @@ class MessageController extends AbstractStandardFormController
         return $this->viewStandard($objectId);
     }
 
+    /**
+     * @param      $objectId
+     * @param bool $ignorePost
+     *
+     * @return \Mautic\CoreBundle\Controller\Response|\Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function viewTwitterAction($objectId)
+    {
+        if (!$this->get('mautic.security')->isGranted('mauticChannel:message:view')) {
+            return $this->accessDenied();
+        }
+
+        $session = $this->get('session');
+
+        /** @var \MauticPlugin\MauticSocialBundle\Model\MonitoringModel $model */
+        $model = $this->getModel('channel.message');
+
+        /** @var \MauticPlugin\MauticSocialBundle\Entity\PostCountRepository $postCountRepo */
+        $postCountRepo = $this->getModel('social.postcount')->getRepository();
+
+        $security = $this->container->get('mautic.security');
+
+        $tweet = $model->getChannelMessageByChannelId($objectId);
+        $this->factory->getLogger()->addError(print_r($tweet, true));
+        $entity = $model->getEntity($tweet['message_id']);
+        //set the asset we came from
+        $page = $session->get('mautic.message.twitter.page', 1);
+
+        $tmpl      = $this->request->isXmlHttpRequest() ? $this->request->get('tmpl', 'details_twitter') : 'details_twitter';
+        $routeVars = [
+            'objectAction' => 'view',
+            'objectId'     => $entity->getId(),
+        ];
+        if ($page !== null) {
+            $routeVars['listPage'] = $page;
+        }
+        $route = $this->generateUrl($this->getActionRoute(), $routeVars);
+        // Audit Log
+        $logs = $this->getModel('core.auditLog')->getLogForObject('tweet', $objectId, $entity->getDateAdded());
+        // Init the date range filter form
+        $dateRangeValues = $this->request->get('daterange', []);
+        $dateRangeForm   = $this->get('form.factory')->create('daterange', $dateRangeValues, ['action' => $route]);
+        $dateFrom        = new \DateTime($dateRangeForm['date_from']->getData());
+        $dateTo          = new \DateTime($dateRangeForm['date_to']->getData());
+
+        $chart     = new LineChart(null, $dateFrom, $dateTo);
+        $leadStats = $model->getLeadStatsPost(
+            $dateFrom,
+            $dateTo,
+            ['message_id' => $tweet['message_id']]
+        );
+        $chart->setDataset($this->get('translator')->trans('mautic.social.twitter.tweet.count'), $leadStats);
+
+        return $this->delegateView(
+            [
+                'returnUrl'      => $route,
+                'viewParameters' => [
+                    'item'          => $entity,
+                    'logs'          => $logs,
+                    'isEmbedded'    => $this->request->get('isEmbedded') ? $this->request->get('isEmbedded') : false,
+                    'tmpl'          => $tmpl,
+                    'security'      => $security,
+                    'stats'         => $chart->render(),
+                    'dateRangeForm' => $dateRangeForm->createView(),
+                ],
+                'contentTemplate' => 'MauticChannelBundle:Message:details_twitter.html.php',
+                'passthroughVars' => [
+                    'activeLink'    => '#mautic_message_index',
+                    'mauticContent' => 'message',
+                ],
+            ]
+        );
+    }
     /**
      * @param $objectId
      *

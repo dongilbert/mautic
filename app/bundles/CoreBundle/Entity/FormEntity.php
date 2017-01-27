@@ -146,10 +146,15 @@ class FormEntity extends CommonEntity
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
         $metadata->setGroupPrefix('publish')
-            ->addProperties(
+            ->addListProperties(
                 [
                     'isPublished',
                     'dateAdded',
+                    'dateModified',
+                ]
+            )
+            ->addProperties(
+                [
                     'createdBy',
                     'createdByUser',
                     'dateModified',
@@ -296,7 +301,7 @@ class FormEntity extends CommonEntity
     /**
      * Get createdBy.
      *
-     * @return User
+     * @return int
      */
     public function getCreatedBy()
     {

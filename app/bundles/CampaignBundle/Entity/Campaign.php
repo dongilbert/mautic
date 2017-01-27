@@ -12,11 +12,13 @@
 namespace Mautic\CampaignBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Mautic\ApiBundle\Serializer\Driver\ApiMetadataDriver;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 use Mautic\CoreBundle\Entity\FormEntity;
 use Mautic\FormBundle\Entity\Form;
+use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadList;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -82,11 +84,6 @@ class Campaign extends FormEntity
     private $canvasSettings = [];
 
     /**
-     * @var
-     */
-    private $campaignType;
-
-    /**
      * Constructor.
      */
     public function __construct()
@@ -99,12 +96,11 @@ class Campaign extends FormEntity
 
     public function __clone()
     {
-        $this->leads        = new ArrayCollection();
-        $this->events       = new ArrayCollection();
-        $this->lists        = new ArrayCollection();
-        $this->forms        = new ArrayCollection();
-        $this->id           = null;
-        $this->campaignType = null;
+        $this->leads  = new ArrayCollection();
+        $this->events = new ArrayCollection();
+        $this->lists  = new ArrayCollection();
+        $this->forms  = new ArrayCollection();
+        $this->id     = null;
 
         parent::__clone();
     }
@@ -157,12 +153,6 @@ class Campaign extends FormEntity
             ->columnName('canvas_settings')
             ->nullable()
             ->build();
-
-        $builder->createField('campaignType', 'string')
-            ->columnName('campaign_type')
-            ->length(60)
-            ->nullable()
-            ->build();
     }
 
     /**
@@ -196,11 +186,20 @@ class Campaign extends FormEntity
                     'publishUp',
                     'publishDown',
                     'events',
-                    'leads', // @deprecated, will be renamed to 'contacts' in 3.0.0
                     'forms',
                     'lists', // @deprecated, will be renamed to 'segments' in 3.0.0
                     'canvasSettings',
-                    'campaignType',
+                ]
+            )
+            ->setGroupPrefix('campaignBasic')
+            ->addListProperties(
+                [
+                    'id',
+                    'name',
+                    'description',
+                    'events',
+                    'publishUp',
+                    'publishDown',
                 ]
             )
             ->build();
@@ -403,8 +402,8 @@ class Campaign extends FormEntity
     /**
      * Add lead.
      *
-     * @param                                    $key
-     * @param \Mautic\CampaignBundle\Entity\Lead $lead
+     * @param      $key
+     * @param Lead $lead
      *
      * @return Campaign
      */
@@ -434,7 +433,7 @@ class Campaign extends FormEntity
     /**
      * Get leads.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Lead[]|\Doctrine\Common\Collections\Collection
      */
     public function getLeads()
     {
@@ -528,22 +527,20 @@ class Campaign extends FormEntity
     }
 
     /**
-     * @return mixed
-     */
-    public function getCampaignType()
-    {
-        return $this->campaignType;
-    }
-
-    /**
-     * @param mixed $campaignType
+     * Get contact membership.
      *
-     * @return Campaign
+     * @param Contact $contact
+     *
+     * @return \Doctrine\Common\Collections\Collection|static|\Mautic\CampaignBundle\Entity\Contact[]
      */
-    public function setCampaignType($campaignType)
+    public function getContactMembership(Contact $contact)
     {
-        $this->campaignType = $campaignType;
-
-        return $this;
+        return $this->leads->matching(
+            Criteria::create()
+                    ->where(
+                        Criteria::expr()->eq('lead', $contact)
+                    )
+                    ->orderBy(['dateAdded' => Criteria::DESC])
+        );
     }
 }

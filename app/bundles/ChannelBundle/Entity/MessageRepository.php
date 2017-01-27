@@ -82,4 +82,23 @@ class MessageRepository extends CommonRepository
 
         return $channels;
     }
+
+    /**
+     * @param $channelId
+     *
+     * @return array
+     */
+    public function getChannelMessageByChannelId($channelId)
+    {
+        $q = $this->_em->getConnection()->createQueryBuilder();
+        $q->from(MAUTIC_TABLE_PREFIX.'message_channels', 'mc')
+            ->select('id, channel, channel_id, properties, message_id')
+            ->where($q->expr()->eq('id', ':channelId'))
+            ->setParameter('channelId', $channelId)
+            ->andWhere($q->expr()->eq('is_enabled', true, 'boolean'));
+
+        $result = $q->execute()->fetch();
+
+        return $result;
+    }
 }

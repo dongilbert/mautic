@@ -1134,18 +1134,19 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
      */
     public function sendEmail($email, $leads, $options = [])
     {
-        $source           = (isset($options['source'])) ? $options['source'] : null;
-        $listId           = (isset($options['listId'])) ? $options['listId'] : null;
-        $ignoreDNC        = (isset($options['ignoreDNC'])) ? $options['ignoreDNC'] : false;
-        $tokens           = (isset($options['tokens'])) ? $options['tokens'] : [];
-        $sendBatchMail    = (isset($options['sendBatchMail'])) ? $options['sendBatchMail'] : true;
-        $assetAttachments = (isset($options['assetAttachments'])) ? $options['assetAttachments'] : [];
-        $customHeaders    = (isset($options['customHeaders'])) ? $options['customHeaders'] : [];
-        $emailType        = (isset($options['email_type'])) ? $options['email_type'] : '';
-        $isMarketing      = (in_array($emailType, ['marketing']) || !empty($listId));
-        $emailAttempts    = (isset($options['email_attempts'])) ? $options['email_attempts'] : 3;
-        $emailPriority    = (isset($options['email_priority'])) ? $options['email_priority'] : MessageQueue::PRIORITY_NORMAL;
-        $messageQueue     = (isset($options['resend_message_queue'])) ? $options['resend_message_queue'] : null;
+        $source              = (isset($options['source'])) ? $options['source'] : null;
+        $listId              = (isset($options['listId'])) ? $options['listId'] : null;
+        $ignoreDNC           = (isset($options['ignoreDNC'])) ? $options['ignoreDNC'] : false;
+        $tokens              = (isset($options['tokens'])) ? $options['tokens'] : [];
+        $sendBatchMail       = (isset($options['sendBatchMail'])) ? $options['sendBatchMail'] : true;
+        $assetAttachments    = (isset($options['assetAttachments'])) ? $options['assetAttachments'] : [];
+        $customHeaders       = (isset($options['customHeaders'])) ? $options['customHeaders'] : [];
+        $emailType           = (isset($options['email_type'])) ? $options['email_type'] : '';
+        $isMarketing         = (in_array($emailType, ['marketing']) || !empty($listId));
+        $emailAttempts       = (isset($options['email_attempts'])) ? $options['email_attempts'] : 3;
+        $emailPriority       = (isset($options['email_priority'])) ? $options['email_priority'] : MessageQueue::PRIORITY_NORMAL;
+        $messageQueue        = (isset($options['resend_message_queue'])) ? $options['resend_message_queue'] : null;
+        $returnErrorMessages = (isset($options['return_errors'])) ? $options['return_errors'] : false;
 
         if (!$email->getId()) {
             return false;
@@ -1153,7 +1154,7 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
 
         $singleEmail = false;
         if (isset($leads['id'])) {
-            $singleEmail = true;
+            $singleEmail = $leads['id'];
             $leads       = [$leads['id'] => $leads];
         }
 
@@ -1298,7 +1299,8 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
             }
         }
 
-        $badEmails = [];
+        $badEmails     = [];
+        $errorMessages = [];
         foreach ($groupedContactsByEmail as $parentId => $translatedEmails) {
             $useSettings = $emailSettings[$parentId];
             foreach ($translatedEmails as $translatedId => $contacts) {
@@ -1308,13 +1310,20 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
                 $flushQueue();
 
                 $mailer->setSource($source);
-                $mailer->setEmail($emailEntity, true, $useSettings['slots'], $assetAttachments);
+                $emailConfigured = $mailer->setEmail($emailEntity, true, $useSettings['slots'], $assetAttachments);
 
                 if (!empty($customHeaders)) {
                     $mailer->setCustomHeaders($customHeaders);
                 }
 
                 foreach ($contacts as $contact) {
+                    if (!$emailConfigured) {
+                        // There was an error configuring the email so fail these
+                        $errors[$contact['id']]        = $contact['email'];
+                        $errorMessages[$contact['id']] = $mailer->getErrors(false);
+                        continue;
+                    }
+
                     $idHash = uniqid();
 
                     // Add tracking pixel token
@@ -1328,7 +1337,7 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
                     try {
                         if (!$mailer->addTo($contact['email'], $contact['firstname'].' '.$contact['lastname'])) {
                             // Clear the errors so it doesn't stop the next send
-                            $mailer->clearErrors();
+                            $errorMessages[$contact['id']] = $mailer->getErrors();
 
                             // Bad email so note and continue
                             $errors[$contact['id']]    = $contact['email'];
@@ -1341,7 +1350,7 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
 
                         if (!$mailer->addTo($contact['email'], $contact['firstname'].' '.$contact['lastname'])) {
                             // Clear the errors so it doesn't stop the next send
-                            $mailer->clearErrors();
+                            $errorMessages[$contact['id']] = $mailer->getErrors();
 
                             // Bad email so note and continue
                             $errors[$contact['id']]    = $contact['email'];
@@ -1417,7 +1426,12 @@ class EmailModel extends FormModel implements AjaxLookupModelInterface
 
         unset($saveEntities, $badEmails, $emailSentCounts, $emailSettings, $options, $tokens, $useEmail, $sendTo);
 
-        return $singleEmail ? (empty($errors)) : $errors;
+        $success = empty($errors);
+        if (!$success && $returnErrorMessages) {
+            return $singleEmail ? $errorMessages[$singleEmail] : $errorMessages;
+        }
+
+        return $singleEmail ? $success : $errors;
     }
 
     /**
