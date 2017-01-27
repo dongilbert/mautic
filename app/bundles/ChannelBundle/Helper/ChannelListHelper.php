@@ -115,7 +115,7 @@ class ChannelListHelper
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getChannels()
     {

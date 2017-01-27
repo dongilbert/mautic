@@ -16,6 +16,7 @@ use Mautic\ChannelBundle\Event\ChannelEvent;
 use Mautic\ChannelBundle\Model\MessageModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
 use Mautic\LeadBundle\Model\LeadModel;
+use Mautic\ReportBundle\Model\ReportModel;
 
 /**
  * Class ChannelSubscriber.
@@ -44,7 +45,10 @@ class ChannelSubscriber extends CommonSubscriber
                         'detailView'     => 'MauticSmsBundle:Sms:view',
                         'mauticContent'  => 'sms',
                     ],
-                    LeadModel::CHANNEL_FEATURE => [],
+                    LeadModel::CHANNEL_FEATURE   => [],
+                    ReportModel::CHANNEL_FEATURE => [
+                        'table' => 'sms_messages',
+                    ],
                 ]
             );
         }

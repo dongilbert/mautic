@@ -53,8 +53,6 @@ class ReportSubscriber extends CommonSubscriber
             $eventAliasPrefix = 'e_';
             $catPrefix        = 'cat.';
             $leadPrefix       = 'l.';
-            $ipPrefix         = 'ip.';
-            $ipAliasPrefix    = 'ip_';
 
             $columns = [
                 // Log columns
@@ -142,7 +140,8 @@ class ReportSubscriber extends CommonSubscriber
                 $event->getStandardColumns($campaignPrefix, [], 'mautic_campaign_action'),
                 $event->getCategoryColumns($catPrefix),
                 $event->getLeadColumns($leadPrefix),
-                $event->getIpColumn($ipPrefix)
+                $event->getIpColumn(),
+                $event->getChannelColumns()
             );
 
             $data = [
@@ -171,10 +170,12 @@ class ReportSubscriber extends CommonSubscriber
                 $qb->from(MAUTIC_TABLE_PREFIX.'campaign_lead_event_log', 'log')
                     ->leftJoin('log', MAUTIC_TABLE_PREFIX.'campaigns', 'c', 'c.id = log.campaign_id')
                     ->leftJoin('log', MAUTIC_TABLE_PREFIX.'campaign_events', 'e', 'e.id = log.event_id')
-                    ->leftJoin('log', MAUTIC_TABLE_PREFIX.'leads', 'l', 'l.id = log.lead_id')
-                    ->leftJoin('log', MAUTIC_TABLE_PREFIX.'ip_addresses', 'ip', 'ip.id = log.ip_id')
                 ;
-                $event->addCategoryLeftJoin($qb, 'c', 'cat');
+                $event
+                    ->addLeadLeftJoin($qb, 'log')
+                    ->addIpAddressLeftJoin($qb, 'log')
+                    ->addCategoryLeftJoin($qb, 'c', 'cat')
+                    ->addChannelLeftJoins($qb, 'log');
                 break;
         }
 

@@ -15,6 +15,7 @@ use Mautic\ChannelBundle\ChannelEvents;
 use Mautic\ChannelBundle\Event\ChannelEvent;
 use Mautic\ChannelBundle\Model\MessageModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
+use Mautic\ReportBundle\Model\ReportModel;
 
 /**
  * Class ChannelSubscriber.
@@ -44,6 +45,9 @@ class ChannelSubscriber extends CommonSubscriber
                     'lookupFormType' => 'notification_list',
                     'detailView'     => 'MauticNotificationBundle:Notification:view',
                     'mauticContent'  => 'notification',
+                ],
+                ReportModel::CHANNEL_FEATURE => [
+                    'table' => 'dynamic_content',
                 ],
             ]
         );

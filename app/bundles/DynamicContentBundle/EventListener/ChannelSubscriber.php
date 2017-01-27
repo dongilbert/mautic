@@ -15,6 +15,7 @@ use Mautic\ChannelBundle\ChannelEvents;
 use Mautic\ChannelBundle\Event\ChannelEvent;
 use Mautic\ChannelBundle\Model\MessageModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
+use Mautic\ReportBundle\Model\ReportModel;
 
 /**
  * Class ChannelSubscriber.
@@ -39,6 +40,9 @@ class ChannelSubscriber extends CommonSubscriber
         $event->addChannel(
             'dynamicContent',
             [
+                ReportModel::CHANNEL_FEATURE => [
+                    'table' => 'dynamic_content',
+                ],
                 /*
                 MessageModel::CHANNEL_FEATURE => [
                     'lookupFormType' => 'dwc_list',
