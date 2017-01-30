@@ -140,6 +140,9 @@ return [
                     'mautic.asset.model.asset',
                 ],
             ],
+            'mautic.asset.subscriber.channel' => [
+                'class' => \Mautic\AssetBundle\EventListener\ChannelSubscriber::class,
+            ],
         ],
         'forms' => [
             'mautic.form.type.asset' => [
