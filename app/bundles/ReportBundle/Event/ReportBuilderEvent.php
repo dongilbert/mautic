@@ -341,12 +341,6 @@ class ReportBuilderEvent extends AbstractReportEvent
                 'alias'       => 'channel_category_id',
                 'channelData' => [],
             ],
-            MauticReportBuilder::CHANNEL_COLUMN_CREATED_BY => [
-                'label'       => 'mautic.report.campaign.channel.created_by',
-                'type'        => 'int',
-                'alias'       => 'channel_created_by',
-                'channelData' => [],
-            ],
             MauticReportBuilder::CHANNEL_COLUMN_CREATED_BY_USER => [
                 'label'       => 'mautic.report.campaign.channel.created_by_user',
                 'type'        => 'string',

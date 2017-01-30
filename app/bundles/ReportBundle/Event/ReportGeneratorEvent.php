@@ -264,7 +264,7 @@ class ReportGeneratorEvent extends AbstractReportEvent
                 continue;
             }
 
-            $channelParameter = 'channelParameter'.$channel;
+            $channelParameter = 'channelParameter'.str_replace('.', '_', $channel);
 
             $queryBuilder->leftJoin(
                 $prefix,

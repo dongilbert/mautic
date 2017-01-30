@@ -178,6 +178,9 @@ return [
                     'doctrine.orm.entity_manager',
                 ],
             ],
+            'mautic.page.subscriber.channel' => [
+                'class' => \Mautic\PageBundle\EventListener\ChannelSubscriber::class,
+            ],
         ],
         'forms' => [
             'mautic.form.type.page' => [

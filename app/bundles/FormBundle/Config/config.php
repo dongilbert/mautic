@@ -186,6 +186,9 @@ return [
                     'doctrine.orm.entity_manager',
                 ],
             ],
+            'mautic.form.subscriber.channel' => [
+                'class' => \Mautic\FormBundle\EventListener\ChannelSubscriber::class,
+            ],
         ],
         'forms' => [
             'mautic.form.type.form' => [

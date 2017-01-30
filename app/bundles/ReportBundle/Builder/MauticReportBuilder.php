@@ -79,7 +79,6 @@ final class MauticReportBuilder implements ReportBuilderInterface
     const CHANNEL_COLUMN_NAME            = 'channel.name';
     const CHANNEL_COLUMN_DESCRIPTION     = 'channel.description';
     const CHANNEL_COLUMN_DATE_ADDED      = 'channel.date_added';
-    const CHANNEL_COLUMN_CREATED_BY      = 'channel.created_by';
     const CHANNEL_COLUMN_CREATED_BY_USER = 'channel.created_by_user';
 
     /**
