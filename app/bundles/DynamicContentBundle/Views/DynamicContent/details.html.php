@@ -28,41 +28,40 @@ $translationContent = $view->render(
 $showTranslations = !empty(trim($translationContent));
 
 $customButtons = [];
-if (!$isEmbedded) {
-    $view['slots']->set(
-        'actions',
-        $view->render(
-            'MauticCoreBundle:Helper:page_actions.html.php',
-            [
-                'item'            => $entity,
-                'customButtons'   => (isset($customButtons)) ? $customButtons : [],
-                'templateButtons' => [
-                    'edit' => $view['security']->hasEntityAccess(
-                        $permissions['dynamicContent:dynamicContents:editown'],
-                        $permissions['dynamicContent:dynamicContents:editother'],
-                        $entity->getCreatedBy()
-                    ),
-                    'clone'  => $permissions['dynamicContent:dynamicContents:create'],
-                    'delete' => $view['security']->hasEntityAccess(
-                        $permissions['dynamicContent:dynamicContents:deleteown'],
-                        $permissions['dynamicContent:dynamicContents:deleteother'],
-                        $entity->getCreatedBy()
-                    ),
-                    'close' => $view['security']->hasEntityAccess(
-                        $permissions['dynamicContent:dynamicContents:viewown'],
-                        $permissions['dynamicContent:dynamicContents:viewother'],
-                        $entity->getCreatedBy()
-                    ),
-                ],
-                'routeBase' => 'dynamicContent',
-            ]
-        )
-    );
-    $view['slots']->set(
-        'publishStatus',
-        $view->render('MauticCoreBundle:Helper:publishstatus_badge.html.php', ['entity' => $entity])
-    );
-}
+
+$view['slots']->set(
+    'actions',
+    $view->render(
+        'MauticCoreBundle:Helper:page_actions.html.php',
+        [
+            'item'            => $entity,
+            'customButtons'   => (isset($customButtons)) ? $customButtons : [],
+            'templateButtons' => [
+                'edit' => $view['security']->hasEntityAccess(
+                    $permissions['dynamiccontent:dynamiccontents:editown'],
+                    $permissions['dynamiccontent:dynamiccontents:editother'],
+                    $entity->getCreatedBy()
+                ),
+                'clone'  => $permissions['dynamiccontent:dynamiccontents:create'],
+                'delete' => $view['security']->hasEntityAccess(
+                    $permissions['dynamiccontent:dynamiccontents:deleteown'],
+                    $permissions['dynamiccontent:dynamiccontents:deleteother'],
+                    $entity->getCreatedBy()
+                ),
+                'close' => $view['security']->hasEntityAccess(
+                    $permissions['dynamiccontent:dynamiccontents:viewown'],
+                    $permissions['dynamiccontent:dynamiccontents:viewother'],
+                    $entity->getCreatedBy()
+                ),
+            ],
+            'routeBase' => 'dynamicContent',
+        ]
+    )
+);
+$view['slots']->set(
+    'publishStatus',
+    $view->render('MauticCoreBundle:Helper:publishstatus_badge.html.php', ['entity' => $entity])
+);
 ?>
 
 <!-- start: box layout -->

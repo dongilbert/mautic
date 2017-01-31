@@ -162,28 +162,22 @@ class CampaignSubscriber extends CommonSubscriber
             )
         );
 
-        $leadIds = [$lead->getId()];
-        $result  = [
-            'type'    => 'mautic.sms.sms',
-            'status'  => 'mautic.sms.timeline.status.delivered',
-            'id'      => $sms->getId(),
-            'name'    => $sms->getName(),
-            'content' => $tokenEvent->getContent(),
-        ];
+        $defaultFrequencyNumber = $this->coreParametersHelper->getParameter('sms_frequency_number');
+        $defaultFrequencyTime   = $this->coreParametersHelper->getParameter('sms_frequency_time');
 
-        // @todo - implement MessageQueue listeners and move most of this method into SmsModel::sendSms()
-        // because these are going to be scheduled and never processed
-        $this->messageQueueModel->processFrequencyRules($leadIds, 'sms', $sms->getId(), $event->getEvent()['id']);
-        if (empty($leadIds)) {
-            $result['status'] = 'mautic.sms.timeline.status.scheduled';
-            $event->setResult($result);
+        /** @var \Mautic\LeadBundle\Entity\FrequencyRuleRepository $frequencyRulesRepo */
+        $frequencyRulesRepo = $this->leadModel->getFrequencyRuleRepository();
+
+        $leadIds    = $lead->getId();
+        $dontSendTo = $frequencyRulesRepo->getAppliedFrequencyRules('sms', $leadIds, $defaultFrequencyNumber, $defaultFrequencyTime);
+
+        $metadata = 'mautic.sms.campaign.failed.not_contactable';
+        if (empty($dontSendTo) || (!empty($dontSendTo) && $dontSendTo[0]['lead_id'] != $lead->getId())) {
+            $metadata = $this->smsApi->sendSms($leadPhoneNumber, $tokenEvent->getContent());
         }
 
-        $metadata = $this->smsApi->sendSms($leadPhoneNumber, $tokenEvent->getContent());
-
-        // If there was a problem sending at this point, it's an API problem and should be requeued
-        if ($metadata === false) {
-            return $event->setResult(false);
+        if (true !== $metadata) {
+            return $event->setFailed($metadata);
         }
 
         $this->smsModel->createStatEntry($sms, $lead);

@@ -90,4 +90,78 @@ class FormController extends AbstractStandardFormController
     {
         // ignore - for BC only
     }
+
+    /**
+     * Deletes a group of entities.
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    protected function batchDeleteStandard(array $viewParameters = [])
+    {
+        $page      = $this->get('session')->get($this->sessionBase.'.page', 1);
+        $returnUrl = $this->generateUrl($this->routeBase.'_index', ['page' => $page]);
+        $flashes   = [];
+
+        $postActionVars = [
+            'returnUrl'       => $returnUrl,
+            'viewParameters'  => array_merge(['page' => $page], $viewParameters),
+            'contentTemplate' => $this->templateBase.':index',
+            'passthroughVars' => [
+                'activeLink'    => $this->activeLink,
+                'mauticContent' => $this->mauticContent,
+            ],
+        ];
+
+        if ($this->request->getMethod() == 'POST') {
+            $model     = $this->getModel($this->modelName);
+            $ids       = json_decode($this->request->query->get('ids', ''));
+            $deleteIds = [];
+
+            // Loop over the IDs to perform access checks pre-delete
+            foreach ($ids as $objectId) {
+                $entity = $model->getEntity($objectId);
+
+                if ($entity === null) {
+                    $flashes[] = [
+                        'type'    => 'error',
+                        'msg'     => $this->langStringBase.'.error.notfound',
+                        'msgVars' => ['%id%' => $objectId],
+                    ];
+                } elseif (!$this->get('mautic.security')->hasEntityAccess(
+                    $this->permissionBase.':deleteown',
+                    $this->permissionBase.':deleteother',
+                    $entity->getCreatedBy()
+                )
+                ) {
+                    $flashes[] = $this->accessDenied(true);
+                } elseif ($model->isLocked($entity)) {
+                    $flashes[] = $this->isLocked($postActionVars, $entity, $this->modelName, true);
+                } else {
+                    $deleteIds[] = $objectId;
+                }
+            }
+
+            // Delete everything we are able to
+            if (!empty($deleteIds)) {
+                $entities = $model->deleteEntities($deleteIds);
+
+                $flashes[] = [
+                    'type'    => 'notice',
+                    'msg'     => $this->langStringBase.'.notice.batch_deleted',
+                    'msgVars' => [
+                        '%count%' => count($entities),
+                    ],
+                ];
+            }
+        } //else don't do anything
+
+        return $this->postActionRedirect(
+            array_merge(
+                $postActionVars,
+                [
+                    'flashes' => $flashes,
+                ]
+            )
+        );
+    }
 }

@@ -28,6 +28,7 @@ class DynamicContentApiController extends CommonApiController
         $this->entityClass     = 'Mautic\DynamicContentBundle\Entity\DynamicContent';
         $this->entityNameOne   = 'dynamicContent';
         $this->entityNameMulti = 'dynamicContents';
+        $this->permissionBase  = 'dynamiccontent:dynamiccontents';
 
         parent::initialize($event);
     }
