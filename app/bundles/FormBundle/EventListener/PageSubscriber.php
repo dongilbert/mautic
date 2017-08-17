@@ -105,7 +105,7 @@ class PageSubscriber extends CommonSubscriber
                     $pageInput = "\n<input type=\"hidden\" name=\"mauticform[mauticpage]\" value=\"{$page->getId()}\" />\n";
                     $formHtml  = preg_replace('#</form>#', $pageInput.'</form>', $formHtml);
 
-                    //pouplate get parameters
+                    //populate get parameters
                     //priority populate value order by: query string (parameters) -> with lead
                     if (!$form->getInKioskMode()) {
                         $this->formModel->populateValuesWithLead($form, $formHtml);
