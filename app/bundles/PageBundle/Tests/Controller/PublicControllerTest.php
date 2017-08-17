@@ -11,6 +11,7 @@
 
 namespace Mautic\PageBundle\Tests\Controller;
 
+use Mautic\CoreBundle\Factory\ModelFactory;
 use Mautic\CoreBundle\Helper\CookieHelper;
 use Mautic\CoreBundle\Security\Permissions\CorePermissions;
 use Mautic\CoreBundle\Templating\Helper\AnalyticsHelper;
@@ -20,11 +21,12 @@ use Mautic\LeadBundle\Model\LeadModel;
 use Mautic\PageBundle\Entity\Page;
 use Mautic\PageBundle\Model\PageModel;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Router;
 
-class PublicController extends \PHPUnit_Framework_TestCase
+class PublicControllerTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * Test that the appropriate variant is displayed based on hit counts and variant weights.
@@ -181,6 +183,9 @@ class PublicController extends \PHPUnit_Framework_TestCase
         $container = $this->getMockBuilder(Container::class)
             ->disableOriginalConstructor()
             ->getMock();
+
+        $modelFactory = new ModelFactory($container);
+
         $container->method('has')
             ->will($this->returnValue(true));
         $container->method('get')
@@ -195,6 +200,7 @@ class PublicController extends \PHPUnit_Framework_TestCase
                         ['mautic.lead.model.lead', Container::EXCEPTION_ON_INVALID_REFERENCE, $leadModel],
                         ['router', Container::EXCEPTION_ON_INVALID_REFERENCE, $router],
                         ['event_dispatcher', Container::EXCEPTION_ON_INVALID_REFERENCE, $dispatcher],
+                        ['mautic.model.factory', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $modelFactory],
                     ]
                 )
             );
