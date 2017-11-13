@@ -18,8 +18,11 @@ use Doctrine\DBAL\Query\Expression\ExpressionBuilder;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\MySqlSchemaManager;
+use Doctrine\DBAL\Types\DateTimeType;
 use Doctrine\DBAL\Types\TextType;
 use Doctrine\ORM\EntityManager;
+use Mautic\CoreBundle\Helper\DateTimeHelper;
+use Mautic\CoreBundle\Translation\Translator;
 use Mautic\LeadBundle\Entity\LeadListRepository;
 
 class LeadListRepositoryTest extends \PHPUnit_Framework_TestCase
@@ -309,6 +312,547 @@ class LeadListRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($parameters[$match[1]]) && $parameters[$match[1]] == '%blah.com', $string);
     }
 
+    public function testDateTimeFiltersYear()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'last_active',
+                'object'   => 'lead',
+                'type'     => 'datetime',
+                'display'  => null,
+                'filter'   => 'mautic.lead.list.year_this',
+            ],
+        ];
+
+        $expr = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+
+        $today    = new DateTimeHelper('midnight first day of this year', null, 'local');
+        $nextYear = $today->modify('+1 year', true);
+
+        $string = (string) $expr;
+        $found  = preg_match('/^\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) >= :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($today->toUtcString('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+
+        $found = preg_match('/\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) < :([a-zA-Z]*)\)$/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($nextYear->format('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+    }
+
+    public function testDateTimeFiltersMonth()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'last_active',
+                'object'   => 'lead',
+                'type'     => 'datetime',
+                'display'  => null,
+                'filter'   => 'mautic.lead.list.month_this',
+            ],
+        ];
+
+        $expr = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+
+        $today     = new DateTimeHelper('midnight first day of this month', null, 'local');
+        $nextMonth = $today->modify('+1 month', true);
+
+        $string = (string) $expr;
+        $found  = preg_match('/^\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) >= :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($today->toUtcString('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+
+        $found = preg_match('/\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) < :([a-zA-Z]*)\)$/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($nextMonth->format('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+    }
+
+    public function testDateTimeFiltersWeek()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'last_active',
+                'object'   => 'lead',
+                'type'     => 'datetime',
+                'display'  => null,
+                'filter'   => 'mautic.lead.list.week_this',
+            ],
+        ];
+
+        $expr = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+
+        $today    = new DateTimeHelper('midnight monday this week', null, 'local');
+        $nextYear = $today->modify('+1 week', true);
+
+        $string = (string) $expr;
+        $found  = preg_match('/^\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) >= :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($today->toUtcString('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+
+        $found = preg_match('/\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) < :([a-zA-Z]*)\)$/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($nextYear->format('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+    }
+
+    public function testDateTimeFiltersDay()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'last_active',
+                'object'   => 'lead',
+                'type'     => 'datetime',
+                'display'  => null,
+                'filter'   => 'mautic.lead.list.yesterday',
+            ],
+        ];
+
+        $expr = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+
+        $today = new DateTimeHelper('today', null, 'local');
+        $today->modify('-1 day');
+        $tomorrow = $today->modify('+1 day', true);
+
+        $string = (string) $expr;
+        $found  = preg_match('/^\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) >= :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($today->toUtcString('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+
+        $found = preg_match('/\(STR_TO_DATE\(l.last_active, \'%Y-%m-%d %k:%i:%s\'\) < :([a-zA-Z]*)\)$/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals($tomorrow->format('Y-m-d 00:00:00'), $parameters[$match[1]], $string);
+    }
+
+    public function testUrlTitleEq()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'url_title',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'Mautic Page Title',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.url_title = :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('Mautic Page Title', $parameters[$match[2]]);
+    }
+
+    public function testUrlTitleRegexp()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'regexp',
+                'field'    => 'url_title',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'Mautic Page Title',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.lead_id = l.id\) AND \(\1.url_title REGEXP :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('Mautic Page Title', $parameters[$match[2]]);
+    }
+
+    public function testUrlTitleContains()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'contains',
+                'field'    => 'url_title',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'Mautic Page Title',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.url_title LIKE :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('%Mautic Page Title%', $parameters[$match[2]]);
+    }
+
+    public function testUrlTitleStartsWith()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'startsWith',
+                'field'    => 'url_title',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'Mautic Page Title',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.url_title LIKE :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('Mautic Page Title%', $parameters[$match[2]]);
+    }
+
+    public function testUrlTitleEndsWith()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'endsWith',
+                'field'    => 'url_title',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'Mautic Page Title',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.url_title LIKE :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('%Mautic Page Title', $parameters[$match[2]]);
+    }
+
+    public function testDeviceModelEq()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'device_model',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'iPhone',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/lead_devices ([a-zA-Z]*) WHERE \(\1.device_model = :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('iPhone', $parameters[$match[2]]);
+    }
+
+    public function testDeviceModelNotLike()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '!like',
+                'field'    => 'device_model',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'iPhone',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/lead_devices ([a-zA-Z]*) WHERE \(\1.device_model LIKE :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('%iPhone%', $parameters[$match[2]]);
+    }
+
+    public function testDeviceModelNotRegexp()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '!regexp',
+                'field'    => 'device_model',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'iPhone',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/lead_devices ([a-zA-Z]*) WHERE \(\1.lead_id = l.id\) AND \(\1.device_model NOT REGEXP :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('iPhone', $parameters[$match[2]]);
+    }
+
+    public function testHitUrlDateEq()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '=',
+                'field'    => 'hit_url_date',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'today',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.date_hit = :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('today', $parameters[$match[2]]);
+    }
+
+    public function testHitUrlDateBetween()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'between',
+                'field'    => 'hit_url_date',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => [
+                    'yesterday',
+                    'today',
+                ],
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.date_hit >= :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('yesterday', $parameters[$match[2]]);
+
+        $found = preg_match('/date_hit < :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals('today', $parameters[$match[1]]);
+    }
+
+    public function testHitUrlDateNotBetween()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => '!between',
+                'field'    => 'hit_url_date',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => [
+                    'yesterday',
+                    'today',
+                ],
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.date_hit < :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('yesterday', $parameters[$match[2]]);
+
+        $found = preg_match('/date_hit >= :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[1], $parameters);
+        $this->assertEquals('today', $parameters[$match[1]]);
+    }
+
+    public function testLeadEmailReadDateLike()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'like',
+                'field'    => 'lead_email_read_date',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'today',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/email_stats ([a-zA-Z]*) WHERE \(\1.date_read LIKE :([a-zA-Z]*)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+        $this->assertArrayHasKey($match[2], $parameters);
+        $this->assertEquals('today', $parameters[$match[2]]);
+    }
+
+    public function testNotificationEmpty()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'empty',
+                'field'    => 'notification',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 0,
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/push_ids ([a-zA-Z]*) WHERE \(\1.id IS NULL\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+    }
+
+    public function testRedirectIdNotEmpty()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'like',
+                'field'    => 'redirect_id',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 1,
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.redirect_id IS NOT NULL\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+    }
+
+    public function testSessionsEq()
+    {
+        list($mockRepository, $reflectedMethod, $connection) = $this->getReflectedGenerateSegmentExpressionMethod(true);
+
+        $parameters = [];
+        $qb         = $connection->createQueryBuilder();
+        $filters    = [
+            [
+                'glue'     => 'and',
+                'operator' => 'like',
+                'field'    => 'sessions',
+                'object'   => 'lead',
+                'type'     => 'text',
+                'display'  => null,
+                'filter'   => 'today',
+            ],
+        ];
+
+        $expr   = $reflectedMethod->invokeArgs($mockRepository, [$filters, &$parameters, $qb]);
+        $string = (string) $expr;
+        $found  = preg_match('/page_hits ([a-zA-Z]*) WHERE \(\1.lead_id = l.id\) AND \(\1.date_hit > \([a-zA-Z]*.date_hit - INTERVAL 30 MINUTE\)\)/', $string, $match);
+        $this->assertEquals(1, $found, $string);
+    }
+
     private function getReflectedGenerateSegmentExpressionMethod($noFilters = false)
     {
         defined('MAUTIC_TABLE_PREFIX') or define('MAUTIC_TABLE_PREFIX', '');
@@ -339,23 +883,28 @@ class LeadListRepositoryTest extends \PHPUnit_Framework_TestCase
         $mockSchemaManager->method('listTableColumns')
             ->willReturnCallback(
                 function ($table) {
-                    $mockType = $this->getMockBuilder(TextType::class)
+                    $mockTextType = $this->getMockBuilder(TextType::class)
                         ->disableOriginalConstructor()
                         ->getMock();
+                    $mockDateTimeType = $this->getMockBuilder(DateTimeType::class)
+                        ->disableOriginalConstructor()
+                        ->getMock();
+
                     switch ($table) {
                         case 'leads':
-                            $name = 'email';
+                            return [
+                                'email'       => new Column('email', $mockTextType),
+                                'last_active' => new Column('last_active', $mockDateTimeType),
+                            ];
                             break;
                         case 'companies':
-                            $name = 'company_email';
+                            return [
+                                'company_email' => new Column('company_email', $mockTextType),
+                            ];
                             break;
                     }
 
-                    $column = new Column($name, $mockType);
-
-                    return [
-                        $name => $column,
-                    ];
+                    return [];
                 }
             );
 
@@ -434,6 +983,17 @@ class LeadListRepositoryTest extends \PHPUnit_Framework_TestCase
                     return $qb;
                 }
             );
+
+        $mockTranslator = $this->getMockBuilder(Translator::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['trans'])
+            ->getMock();
+
+        $mockTranslator->expects($this->any())
+            ->method('trans')
+            ->willReturnArgument(0);
+
+        $mockRepository->setTranslator($mockTranslator);
 
         $reflectedMockRepository = new \ReflectionObject($mockRepository);
         $method                  = $reflectedMockRepository->getMethod('generateSegmentExpression');
