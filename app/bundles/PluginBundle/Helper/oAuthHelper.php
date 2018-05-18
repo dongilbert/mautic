@@ -43,8 +43,8 @@ class oAuthHelper
         $this->clientId          = isset($keys[$clientId]) ? $keys[$clientId] : null;
         $this->clientSecret      = isset($keys[$clientSecret]) ? $keys[$clientSecret] : null;
         $authToken               = $integration->getAuthTokenKey();
-        $this->accessToken       = (isset($keys[$authToken])) ? $keys[$authToken] : '';
-        $this->accessTokenSecret = (isset($settings['token_secret'])) ? $settings['token_secret'] : '';
+        $this->accessToken       = isset($keys[$authToken]) ? $keys[$authToken] : '';
+        $this->accessTokenSecret = isset($settings['token_secret']) ? $settings['token_secret'] : '';
         $this->callback          = $integration->getAuthCallbackUrl();
         $this->settings          = $settings;
         $this->request           = $request;
@@ -73,7 +73,9 @@ class oAuthHelper
 
         if (!empty($this->settings['double_encode_basestring_parameters'])) {
             // Parameters must be encoded before going through buildBaseString
-            array_walk($parameters, create_function('&$val, $key, $oauth', '$val = $oauth->encode($val);'), $this);
+            array_walk($parameters, function (&$val, $key) {
+                $val = $this->encode($val);
+            });
         }
 
         $signature = array_merge($headers, $parameters);
