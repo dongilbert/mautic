@@ -9,4 +9,8 @@ class IntegrationAuthService
     public function __construct($authType)
     {
     }
+
+    public function prepareRequest()
+    {
+    }
 }

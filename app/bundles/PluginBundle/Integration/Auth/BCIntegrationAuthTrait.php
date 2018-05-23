@@ -2,6 +2,14 @@
 
 namespace Mautic\PluginBundle\Integration\Auth;
 
+use Mautic\PluginBundle\Entity\Integration;
+use Mautic\PluginBundle\Event\PluginIntegrationAuthCallbackUrlEvent;
+use Mautic\PluginBundle\Exception\ApiErrorException;
+use Mautic\PluginBundle\PluginEvents;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 /**
  * @DEPRECATED: To be removed in 3.0
  */
