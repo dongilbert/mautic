@@ -191,4 +191,9 @@ final class CampaignEvents
      * @var string
      */
     const ON_EVENT_DECISION_TRIGGER = 'mautic.campaign_on_event_decision_trigger';
+
+    /**
+     * The mautic.campaign_on_event_jump_to_event event is dispatched when a.
+     */
+    const ON_EVENT_JUMP_TO_EVENT = 'mautic.campaign_on_event_jump_to_event';
 }
