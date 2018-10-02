@@ -11,7 +11,9 @@
 
 namespace Mautic\LeadBundle\Controller;
 
+use Illuminate\Support\Collection;
 use Mautic\CoreBundle\Entity\AuditLogRepository;
+use Mautic\CoreBundle\Entity\IpAddress;
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Mautic\CoreBundle\Model\AuditLogModel;
@@ -156,28 +158,38 @@ trait LeadDetailsTrait
     protected function getPlaces(Lead $lead)
     {
         // Get Places from IP addresses
-        $places = [];
-        if ($lead->getIpAddresses()) {
-            foreach ($lead->getIpAddresses() as $ip) {
-                if ($details = $ip->getIpDetails()) {
-                    if (!empty($details['latitude']) && !empty($details['longitude'])) {
-                        $name = 'N/A';
-                        if (!empty($details['city'])) {
-                            $name = $details['city'];
-                        } elseif (!empty($details['region'])) {
-                            $name = $details['region'];
-                        }
-                        $place = [
-                            'latLng' => [$details['latitude'], $details['longitude']],
-                            'name'   => $name,
-                        ];
-                        $places[] = $place;
-                    }
-                }
-            }
+        return (new Collection($lead->getIpAddresses()))
+            ->reduce(function (Collection $accumulator, IpAddress $ip) {
+                $accumulator[] = $ip->getIpDetails();
+
+                return $accumulator;
+            }, new Collection())->filter(function ($details) {
+                return !empty($details['latitude']) && !empty($details['longitude']);
+            })->map(function ($details) {
+                return [
+                    'latLng' => [
+                        $details['latitude'],
+                        $details['longitude'],
+                    ],
+                    'name' => $this->getIpLocationName($details),
+                ];
+            })->values()->toArray();
+    }
+
+    /**
+     * Get the location name from the IP details.
+     */
+    private function getIpLocationName(array $details)
+    {
+        if (!empty($details['city'])) {
+            return $details['city'];
         }
 
-        return $places;
+        if (!empty($details['region'])) {
+            return $details['region'];
+        }
+
+        return 'N/A';
     }
 
     /**
