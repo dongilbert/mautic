@@ -1823,9 +1823,10 @@ class CommonRepository extends EntityRepository
     }
 
     /**
-     * Checks if table contains any rows
+     * Checks if table contains any rows.
      *
      * @param string $table
+     *
      * @return bool
      */
     protected function tableHasRows($table)
@@ -1835,6 +1836,6 @@ class CommonRepository extends EntityRepository
             ->from($table)
             ->setMaxResults(1);
 
-        return (bool)count($query->execute()->fetchAll());
+        return (bool) count($query->execute()->fetchAll());
     }
 }
