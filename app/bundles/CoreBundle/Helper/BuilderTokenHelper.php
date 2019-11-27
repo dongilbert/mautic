@@ -11,26 +11,27 @@
 
 namespace Mautic\CoreBundle\Helper;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\Expression\CompositeExpression;
+use Doctrine\ORM\EntityManager;
 use Mautic\CoreBundle\Factory\MauticFactory;
+use Mautic\CoreBundle\Security\Permissions\CorePermissions;
 
 /**
  * Class BuilderTokenHelper.
  */
 class BuilderTokenHelper
 {
-    protected $viewPermissionBase;
-    protected $modelName;
-    protected $langVar;
-    protected $bundleName;
-    protected $permissionSet;
+    private $security;
+    private $entityManager;
+    private $connection;
+    private $userHelper;
 
-    /**
-     * @var MauticFactory
-     *
-     * @deprecated 2.12 To be removed in 3.0 Inject dependencies in your constructor instead
-     */
-    private $factory;
+    protected $permissionSet;
+    protected $modelName;
+    protected $viewPermissionBase = null;
+    protected $langVar            = null;
+    protected $bundleName         = null;
 
     /**
      * @param MauticFactory $factory
@@ -39,9 +40,13 @@ class BuilderTokenHelper
      * @param string        $bundleName         Bundle name such as MauticPageBundle or null to generate from $modelName
      * @param null          $langVar            Language base for filter such as page.page or leave blank to use $modelName
      */
-    public function __construct(MauticFactory $factory, $modelName, $viewPermissionBase = null, $bundleName = null, $langVar = null)
+    public function __construct(CorePermissions $security, EntityManager $entityManager, Connection $connection, UserHelper $userHelper, $modelName, $viewPermissionBase = null, $bundleName = null, $langVar = null)
     {
-        $this->factory            = $factory;
+        $this->security      = $security;
+        $this->entityManager = $entityManager;
+        $this->connection    = $connection;
+        $this->userHelper    = $userHelper;
+
         $this->modelName          = $modelName;
         $this->viewPermissionBase = (!empty($viewPermissionBase)) ? $viewPermissionBase : "$modelName:{$modelName}s";
         $this->bundleName         = (!empty($bundleName)) ? $bundleName : 'Mautic'.ucfirst($modelName).'Bundle';
@@ -71,7 +76,7 @@ class BuilderTokenHelper
         CompositeExpression $expr = null
     ) {
         //set some permissions
-        $permissions = $this->factory->getSecurity()->isGranted(
+        $permissions = $this->security->isGranted(
             $this->permissionSet,
             'RETURN_ARRAY'
         );
@@ -80,20 +85,20 @@ class BuilderTokenHelper
             return;
         }
 
-        $repo   = $this->factory->getModel($this->modelName)->getRepository();
+        $repo   = $this->entityManager->getRepository($this->modelName);
         $prefix = $repo->getTableAlias();
         if (!empty($prefix)) {
             $prefix .= '.';
         }
 
-        $exprBuilder = $this->factory->getDatabase()->getExpressionBuilder();
+        $exprBuilder = $this->connection->getExpressionBuilder();
         if ($expr == null) {
             $expr = $exprBuilder->andX();
         }
 
         if (isset($permissions[$this->viewPermissionBase.':viewother']) && !$permissions[$this->viewPermissionBase.':viewother']) {
             $expr->add(
-                $exprBuilder->eq($prefix.'created_by', $this->factory->getUser()->getId())
+                $exprBuilder->eq($prefix.'created_by', $this->userHelper->getUser()->getId())
             );
         }
 
@@ -128,43 +133,6 @@ class BuilderTokenHelper
     public function setPermissionSet(array $permissions)
     {
         $this->permissionSet = $permissions;
-    }
-
-    /**
-     * Prevent tokens in URLs from being converted to visual tokens by encoding the brackets.
-     *
-     * @deprecated 2.2.1 - to be removed in 3.0
-     *
-     * @param string $content
-     * @param array  $tokenKeys
-     */
-    public static function encodeUrlTokens(&$content, array $tokenKeys)
-    {
-        $processMatches = function ($matches) use (&$content, $tokenKeys) {
-            foreach ($matches as $link) {
-                // There may be more than one leadfield token in the URL
-                preg_match_all('/{['.implode('|', $tokenKeys).'].*?}/i', $link, $tokens);
-                $newLink = $link;
-                foreach ($tokens as $token) {
-                    // Encode brackets
-                    $encodedToken = str_replace(['{', '}'], ['%7B', '%7D'], $token);
-                    $newLink      = str_replace($token, $encodedToken, $newLink);
-                }
-                $content = str_replace($link, $newLink, $content);
-            }
-        };
-
-        // Special handling for leadfield tokens in URLs
-        $foundMatches = preg_match_all('/<a.*?href=["\'].*?({['.implode('|', $tokenKeys).'].*?}).*?["\']/i', $content, $matches);
-        if ($foundMatches) {
-            $processMatches($matches[0]);
-        }
-
-        // Special handling for leadfield tokens in image src
-        $foundMatches = preg_match_all('/<img.*?src=["\'].*?({['.implode('|', $tokenKeys).'].*?}).*?["\']/i', $content, $matches);
-        if ($foundMatches) {
-            $processMatches($matches[0]);
-        }
     }
 
     /**
