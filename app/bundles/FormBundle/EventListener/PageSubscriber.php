@@ -12,8 +12,7 @@
 namespace Mautic\FormBundle\EventListener;
 
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
-use Mautic\CoreBundle\Helper\BuilderTokenHelper;
-use Mautic\FormBundle\FormEvents;
+use Mautic\CoreBundle\Helper\BuilderTokenHelperFactory;
 use Mautic\FormBundle\Model\FormModel;
 use Mautic\PageBundle\Event\PageBuilderEvent;
 use Mautic\PageBundle\Event\PageDisplayEvent;
@@ -32,13 +31,20 @@ class PageSubscriber extends CommonSubscriber
     protected $formModel;
 
     /**
+     * @var BuilderTokenHelperFactory
+     */
+    protected $builderTokenHelperFactory;
+
+    /**
      * PageSubscriber constructor.
      *
-     * @param FormModel $formModel
+     * @param FormModel                 $formModel
+     * @param BuilderTokenHelperFactory $builderTokenHelperFactory
      */
-    public function __construct(FormModel $formModel)
+    public function __construct(FormModel $formModel, BuilderTokenHelperFactory $builderTokenHelperFactory)
     {
-        $this->formModel = $formModel;
+        $this->formModel                 = $formModel;
+        $this->builderTokenHelperFactory = $builderTokenHelperFactory;
     }
 
     /**
@@ -70,8 +76,8 @@ class PageSubscriber extends CommonSubscriber
         }
 
         if ($event->tokensRequested($this->formRegex)) {
-            $tokenHelper = new BuilderTokenHelper($this->factory, 'form');
-            $event->addTokensFromHelper($tokenHelper, $this->formRegex, 'name', 'id');
+            $tokenHelper = $this->builderTokenHelperFactory->getBuilderTokenHelper('form');
+            $event->addTokensFromHelper($tokenHelper, $this->formRegex, 'name', 'id', true);
         }
     }
 

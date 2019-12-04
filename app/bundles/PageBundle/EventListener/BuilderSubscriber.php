@@ -31,7 +31,7 @@ use Mautic\CoreBundle\Form\Type\SlotSocialFollowType;
 use Mautic\CoreBundle\Form\Type\SlotSocialShareType;
 use Mautic\CoreBundle\Form\Type\SlotSuccessMessageType;
 use Mautic\CoreBundle\Form\Type\SlotTextType;
-use Mautic\CoreBundle\Helper\BuilderTokenHelper;
+use Mautic\CoreBundle\Helper\BuilderTokenHelperFactory;
 use Mautic\EmailBundle\EmailEvents;
 use Mautic\EmailBundle\Event\EmailBuilderEvent;
 use Mautic\EmailBundle\Event\EmailSendEvent;
@@ -57,6 +57,11 @@ class BuilderSubscriber extends CommonSubscriber
     protected $integrationHelper;
 
     /**
+     * @var BuilderTokenHelperFactory
+     */
+    protected $builderTokenHelperFactory;
+
+    /**
      * @var PageModel
      */
     protected $pageModel;
@@ -80,15 +85,21 @@ class BuilderSubscriber extends CommonSubscriber
     /**
      * BuilderSubscriber constructor.
      *
-     * @param TokenHelper       $tokenHelper
-     * @param IntegrationHelper $integrationHelper
-     * @param PageModel         $pageModel
+     * @param TokenHelper               $tokenHelper
+     * @param IntegrationHelper         $integrationHelper
+     * @param PageModel                 $pageModel
+     * @param BuilderTokenHelperFactory $builderTokenHelperFactory
      */
-    public function __construct(TokenHelper $tokenHelper, IntegrationHelper $integrationHelper, PageModel $pageModel)
-    {
-        $this->tokenHelper       = $tokenHelper;
-        $this->integrationHelper = $integrationHelper;
-        $this->pageModel         = $pageModel;
+    public function __construct(
+        TokenHelper $tokenHelper,
+        IntegrationHelper $integrationHelper,
+        PageModel $pageModel,
+        BuilderTokenHelperFactory $builderTokenHelperFactory
+    ) {
+        $this->tokenHelper               = $tokenHelper;
+        $this->integrationHelper         = $integrationHelper;
+        $this->pageModel                 = $pageModel;
+        $this->builderTokenHelperFactory = $builderTokenHelperFactory;
     }
 
     /**
@@ -112,7 +123,7 @@ class BuilderSubscriber extends CommonSubscriber
      */
     public function onPageBuild(Events\PageBuilderEvent $event)
     {
-        $tokenHelper = new BuilderTokenHelper($this->factory, 'page');
+        $tokenHelper = $this->builderTokenHelperFactory->getBuilderTokenHelper('page');
 
         if ($event->abTestWinnerCriteriaRequested()) {
             //add AB Test Winner Criteria
@@ -135,7 +146,7 @@ class BuilderSubscriber extends CommonSubscriber
             $event->addTokensFromHelper($tokenHelper, $this->pageTokenRegex, 'title', 'id', true);
 
             // add only filter based dwc tokens
-            $dwcTokenHelper = new BuilderTokenHelper($this->factory, 'dynamicContent', 'dynamiccontent:dynamiccontents');
+            $dwcTokenHelper = $this->builderTokenHelperFactory->getBuilderTokenHelper('dynamicContent', 'dynamiccontent:dynamiccontents');
             $expr           = $this->factory->getDatabase()->getExpressionBuilder()->andX('e.is_campaign_based <> 1 and e.slot_name is not null');
             $tokens         = $dwcTokenHelper->getTokens(
                 $this->dwcTokenRegex,
@@ -700,8 +711,8 @@ class BuilderSubscriber extends CommonSubscriber
     public function onEmailBuild(EmailBuilderEvent $event)
     {
         if ($event->tokensRequested([$this->pageTokenRegex])) {
-            $tokenHelper = new BuilderTokenHelper($this->factory, 'page');
-            $event->addTokensFromHelper($tokenHelper, $this->pageTokenRegex, 'title', 'id', true);
+            $tokenHelper = $this->builderTokenHelperFactory->getBuilderTokenHelper('page');
+            $event->addTokensFromHelper($tokenHelper, $this->pageTokenRegex, 'title', 'id', false, true);
         }
     }
 
