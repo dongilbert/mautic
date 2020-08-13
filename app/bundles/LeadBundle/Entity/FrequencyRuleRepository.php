@@ -56,7 +56,7 @@ class FrequencyRuleRepository extends CommonRepository
     }
 
     /**
-     * Validates default parameters
+     * Validates default parameters.
      *
      * @param mixed $number
      * @param mixed $time
@@ -137,14 +137,11 @@ class FrequencyRuleRepository extends CommonRepository
                 ->setParameter('leadId', $leadId);
         }
 
-        $results = $q->execute()->fetchAll();
-
-        return $results;
+        return $q->execute()->fetchAll();
     }
 
     /**
      * @param string $channel
-     * @param array  $leadIds
      * @param string $statTable
      * @param string $statContactColumn
      * @param string $statSentColumn
@@ -190,7 +187,6 @@ class FrequencyRuleRepository extends CommonRepository
     }
 
     /**
-     * @param array  $leadIds
      * @param string $defaultFrequencyNumber
      * @param string $defaultFrequencyTime
      * @param string $statTable
