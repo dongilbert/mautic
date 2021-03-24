@@ -122,7 +122,7 @@ class UpdateSchemaStepTest extends AbstractStepTest
 
         $this->eventDispatcher->method('dispatch')
             ->willReturnCallback(
-                function (string $eventName, Event $event) {
+                function (Event $event, string $eventName) {
                     switch ($eventName) {
                         case ConsoleEvents::COMMAND:
                             $event->enableCommand();
